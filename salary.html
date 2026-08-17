@@ -49,7 +49,7 @@
     
     .container { max-width: 440px; margin: 0 auto; width: 100%; }
     
-    /* 标题栏 */
+    /* 标题栏与右上角按钮组 */
     .app-header {
       display: flex;
       align-items: center;
@@ -62,21 +62,26 @@
       letter-spacing: -0.02em;
       color: var(--text);
     }
-    .btn-ratio-setting {
+    .header-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .btn-header-action {
       background: #f1f5f9;
       border: none;
       color: var(--text);
       font-size: 0.78rem;
       font-weight: 600;
-      padding: 6px 12px;
+      padding: 6px 11px;
       border-radius: 20px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       transition: background 0.15s;
     }
-    .btn-ratio-setting:active { background: #e2e8f0; }
+    .btn-header-action:active { background: #e2e8f0; }
 
     /* 极简卡片 */
     .card { 
@@ -192,7 +197,7 @@
       background: #ffffff;
       border-color: var(--text);
     }
-    input[type="month"], input[type="date"] { height: 42px; line-height: 20px; }
+    input[type="month"], input[type="date"], input[type="time"] { height: 42px; line-height: 20px; }
 
     /* 按钮系统 */
     .btn-main { 
@@ -278,10 +283,13 @@
 <body>
 
 <div class="container">
-  <!-- 标题与配置入口 -->
+  <!-- 标题与操作栏 -->
   <header class="app-header">
     <div class="app-title">资产分配</div>
-    <button class="btn-ratio-setting" onclick="openRatioModal()">配比设定</button>
+    <div class="header-actions">
+      <button class="btn-header-action" onclick="openReminderModal()">🔔 提醒</button>
+      <button class="btn-header-action" onclick="openRatioModal()">配比</button>
+    </div>
   </header>
 
   <!-- 账户净余额池卡片 -->
@@ -414,7 +422,70 @@
   </section>
 </div>
 
-<!-- 弹窗 1：比例微调 (主项 ±3%，其余三项各 ±1%) -->
+<!-- 弹窗 1：直接系统弹窗提醒设置 -->
+<div class="modal-overlay" id="reminderModal">
+  <div class="modal-box">
+    <div class="modal-title">设置提醒</div>
+    
+    <!-- 弹窗内部 Tab 切换 -->
+    <div class="tab-nav" style="margin-bottom: 16px;">
+      <button class="tab-btn active" id="tabRemindDailyBtn" onclick="switchRemindTab('daily')">📅 每日记账</button>
+      <button class="tab-btn" id="tabRemindSalaryBtn" onclick="switchRemindTab('salary')">💰 发薪分配</button>
+    </div>
+
+    <!-- 子面板 A：每日记账提醒 -->
+    <div id="remindDailyPanel">
+      <div class="input-group" style="text-align: left; margin-bottom: 14px;">
+        <div class="input-field">
+          <label>每天提醒时间</label>
+          <input type="time" id="dailyRemindTime" value="21:30">
+        </div>
+      </div>
+      <!-- 直接调用系统通知权限 -->
+      <button class="btn-main" onclick="enableWebNotification()">🔔 开启直接弹窗通知</button>
+      <div style="margin-top: 8px;">
+        <button class="btn-action-edit" style="width: 100%; padding: 8px;" onclick="exportDailyCalendar()">或导入系统日历 (.ics)</button>
+      </div>
+    </div>
+
+    <!-- 子面板 B：每月发薪提醒 -->
+    <div id="remindSalaryPanel" style="display: none;">
+      <div class="input-group" style="text-align: left; margin-bottom: 14px;">
+        <div class="input-field">
+          <label>每月发薪日</label>
+          <select id="remindDay">
+            <option value="1">每月 1 号</option>
+            <option value="5">每月 5 号</option>
+            <option value="10" selected>每月 10 号</option>
+            <option value="15">每月 15 号</option>
+            <option value="20">每月 20 号</option>
+            <option value="25">每月 25 号</option>
+            <option value="30">每月 30 号</option>
+          </select>
+        </div>
+        <div class="input-field">
+          <label>提醒时间</label>
+          <select id="remindTime">
+            <option value="09:00" selected>上午 09:00</option>
+            <option value="10:00">上午 10:00</option>
+            <option value="12:00">中午 12:00</option>
+            <option value="18:00">傍晚 18:00</option>
+            <option value="20:00">晚上 20:00</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-main" onclick="exportSalaryCalendar()">导入手机日历准时响铃</button>
+    </div>
+
+    <div id="notifStatusText" style="margin: 12px 0 14px; font-size: 0.72rem; color: var(--text-dim);">
+      点击开启后允许通知，到达时间直接在通知栏弹窗
+    </div>
+
+    <button class="btn-main" style="background:#f1f5f9; color:var(--text-muted); padding:10px;" onclick="closeReminderModal()">关闭</button>
+  </div>
+</div>
+
+<!-- 弹窗 2：比例微调 (主项 ±3%，其余三项各 ±1%) -->
 <div class="modal-overlay" id="ratioModal">
   <div class="modal-box">
     <div class="modal-title">调整分配比例</div>
@@ -463,7 +534,7 @@
   </div>
 </div>
 
-<!-- 弹窗 2：删除确认 -->
+<!-- 弹窗 3：删除确认 -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-box">
     <div class="modal-title" style="margin-bottom: 6px;">确认删除？</div>
@@ -476,7 +547,7 @@
 </div>
 
 <script>
-  const RATIO_STORAGE_KEY = 'salary_ratios_minimal_v1';
+  const RATIO_STORAGE_KEY = 'salary_ratios_minimal_v5';
   let defaultRatios = { life: 40, save: 30, fund: 20, invest: 10 };
   let ratios = JSON.parse(localStorage.getItem(RATIO_STORAGE_KEY)) || defaultRatios;
 
@@ -505,6 +576,186 @@
     localStorage.setItem('expense_records', JSON.stringify(expenseRecords));
   }
 
+  /* 提醒弹窗交互与内部 Tab 切换 */
+  function openReminderModal() {
+    document.getElementById('reminderModal').classList.add('active');
+  }
+  function closeReminderModal() {
+    document.getElementById('reminderModal').classList.remove('active');
+  }
+
+  function switchRemindTab(type) {
+    const dailyBtn = document.getElementById('tabRemindDailyBtn');
+    const salaryBtn = document.getElementById('tabRemindSalaryBtn');
+    const dailyPanel = document.getElementById('remindDailyPanel');
+    const salaryPanel = document.getElementById('remindSalaryPanel');
+
+    if (type === 'daily') {
+      dailyBtn.className = 'tab-btn active';
+      salaryBtn.className = 'tab-btn';
+      dailyPanel.style.display = 'block';
+      salaryPanel.style.display = 'none';
+    } else {
+      dailyBtn.className = 'tab-btn';
+      salaryBtn.className = 'tab-btn active';
+      dailyPanel.style.display = 'none';
+      salaryPanel.style.display = 'block';
+    }
+  }
+
+  /* 方案：直接调用浏览器原生系统通知 (Web Notifications API) */
+  function enableWebNotification() {
+    const statusText = document.getElementById('notifStatusText');
+    const timeVal = document.getElementById('dailyRemindTime').value || '21:30';
+
+    if (!('Notification' in window)) {
+      alert('当前浏览器不支持直接通知，请使用下方的日历导入功能。');
+      return;
+    }
+
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        localStorage.setItem('daily_notif_time', timeVal);
+        statusText.innerText = `✓ 已开启！每天 ${timeVal} 将直接弹出系统通知`;
+        statusText.style.color = '#10b981';
+        
+        // 立即展示一次成功测试通知
+        new Notification('📝 记账提醒已就绪', {
+          body: `已设置每天 ${timeVal} 准时提醒你记账！`,
+          icon: 'data:image/svg+xml,%3Csvg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="50" cy="50" r="50" fill="%236366f1"/%3E%3C/svg%3E'
+        });
+      } else {
+        statusText.innerText = '⚠️ 通知权限被拒绝，请在手机系统设置中允许浏览器通知';
+        statusText.style.color = '#ef4444';
+      }
+    });
+  }
+
+  /* 页面后台运行时定时轮询检查是否到达每日提醒时间 */
+  setInterval(() => {
+    const savedTime = localStorage.getItem('daily_notif_time');
+    if (!savedTime || Notification.permission !== 'granted') return;
+
+    const d = new Date();
+    const curH = String(d.getHours()).padStart(2, '0');
+    const curM = String(d.getMinutes()).padStart(2, '0');
+    const curTime = `${curH}:${curM}`;
+    const todayStr = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    const lastNotifDate = localStorage.getItem('last_notif_date');
+
+    if (curTime === savedTime && lastNotifDate !== todayStr) {
+      new Notification('📝 每日记账提醒', {
+        body: '今天有新的开支吗？别忘了打开记账工具随手记一笔！',
+      });
+      localStorage.setItem('last_notif_date', todayStr);
+    }
+  }, 30000);
+
+  const pad = n => String(n).padStart(2, '0');
+  const formatICSDate = d => {
+    return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
+  };
+
+  function downloadICS(filename, content) {
+    const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    closeReminderModal();
+  }
+
+  function exportDailyCalendar() {
+    const timeVal = document.getElementById('dailyRemindTime').value || '21:30';
+    const [h, m] = timeVal.split(':');
+
+    let target = new Date();
+    target.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
+
+    if (target.getTime() <= Date.now()) {
+      target.setDate(target.getDate() + 1);
+    }
+
+    const startTime = formatICSDate(target);
+    const endTime = formatICSDate(new Date(target.getTime() + 15 * 60 * 1000));
+    const nowTime = formatICSDate(new Date());
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Daily Expense Reminder//CN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `UID:daily-expense-${Date.now()}@salaryapp.local`,
+      `DTSTAMP:${nowTime}`,
+      `DTSTART:${startTime}`,
+      `DTEND:${endTime}`,
+      'RRULE:FREQ=DAILY',
+      'SUMMARY:📝 每日记账提醒：记录今天的开支',
+      'DESCRIPTION:今日有新的消费支出吗？打开记账工具随手记一笔，掌握账户净余额！',
+      'STATUS:CONFIRMED',
+      'BEGIN:VALARM',
+      'TRIGGER:-PT0M',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:每日记账提醒',
+      'END:VALARM',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    downloadICS(`每日记账提醒-${timeVal}.ics`, ics);
+  }
+
+  function exportSalaryCalendar() {
+    const day = parseInt(document.getElementById('remindDay').value, 10);
+    const timeStr = document.getElementById('remindTime').value;
+    const [hour, minute] = timeStr.split(':');
+
+    let target = new Date();
+    target.setDate(day);
+    target.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
+
+    if (target.getTime() <= Date.now()) {
+      target.setMonth(target.getMonth() + 1);
+    }
+
+    const startTime = formatICSDate(target);
+    const endTime = formatICSDate(new Date(target.getTime() + 30 * 60 * 1000));
+    const nowTime = formatICSDate(new Date());
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Salary Allocator//CN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `UID:salary-remind-${Date.now()}@salaryapp.local`,
+      `DTSTAMP:${nowTime}`,
+      `DTSTART:${startTime}`,
+      `DTEND:${endTime}`,
+      'RRULE:FREQ=MONTHLY',
+      'SUMMARY:💰 发薪日提醒：工资智能分配与记账',
+      'DESCRIPTION:今日已发薪，请记得打开资产分配工具进行 4 账户资金分配与本月记账规划！',
+      'STATUS:CONFIRMED',
+      'BEGIN:VALARM',
+      'TRIGGER:-PT0M',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:发薪日工资分配提醒',
+      'END:VALARM',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    downloadICS(`每月发薪提醒-${day}日.ics`, ics);
+  }
+
+  /* 比例弹窗交互 */
   function openRatioModal() {
     updateModalDisplay();
     document.getElementById('ratioModal').classList.add('active');
@@ -514,7 +765,6 @@
     document.getElementById('ratioModal').classList.remove('active');
   }
 
-  // 方案 A 联动逻辑：主项 ±3%，其余 3 项各分摊 ±1%
   function stepPlanA(targetKey, delta) {
     const curVal = ratios[targetKey];
     const nextVal = curVal + delta;
