@@ -3,26 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M708 460a36 36 0 0 0 36-36 36 36 0 0 0-36-36H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v72H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v142.91A33.08 33.08 0 0 0 509.09 780h5.82A33.08 33.08 0 0 0 548 746.91V604h160a36 36 0 0 0 36-36 36 36 0 0 0-36-36H548v-72z' fill='%236366f1'/%3E%3Cpath d='M511.8 388a35.33 35.33 0 0 0 25.28-10.4l72.56-72.8a35.83 35.83 0 0 0 0-50.4 35.52 35.52 0 0 0-50.23 0l-47.13 47.29-47-47.18a35.93 35.93 0 0 0-50.78 0 36.22 36.22 0 0 0 0 51l71.76 72A35.76 35.76 0 0 0 511.8 388z' fill='%236366f1'/%3E%3Cpath d='M100 400.71h144a36 36 0 0 0 36-36 36 36 0 0 0-36-36h-60.33C248 213.74 370.9 136 512 136c195.76 0 356.57 149.6 374.36 340.71H886a36 36 0 0 0 36 36 36 36 0 0 0 36-36h0.6C940.63 245.79 747.55 64 512 64c-157.59 0-296.14 81.38-376 204.39v-47.68a36 36 0 0 0-36-36 36 36 0 0 0-36 36v144a36 36 0 0 0 36 36zM924 624.71H780a36 36 0 0 0-36 36 36 0 0 0 36 36h59.51C775 810.9 652.51 888 512 888c-195.27 0-355.77-148.86-374.22-339.29h-0.29a36 36 0 0 0-36-36 36 36 0 0 0-36 36C84.17 779 276.94 960 512 960c157.58 0 296.15-81.37 376-204.38v49.09a36 36 0 0 0 36 36 36 36 0 0 0 36-36v-144a36 36 0 0 0-36-36z' fill='%236366f1'/%3E%3C/svg%3E">
-  <title>工资智能分配与记账工具</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f8fafc">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1024' height='1024' rx='240' fill='%230f172a'/%3E%3Cpath d='M708 460a36 36 0 0 0 36-36 36 36 0 0 0-36-36H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v72H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v142.91A33.08 33.08 0 0 0 509.09 780h5.82A33.08 33.08 0 0 0 548 746.91V604h160a36 36 0 0 0 36-36 36 36 0 0 0-36-36H548v-72z' fill='%23ffffff'/%3E%3Cpath d='M511.8 388a35.33 35.33 0 0 0 25.28-10.4l72.56-72.8a35.83 35.83 0 0 0 0-50.4 35.52 35.52 0 0 0-50.23 0l-47.13 47.29-47-47.18a35.93 35.93 0 0 0-50.78 0 36.22 36.22 0 0 0 0 51l71.76 72A35.76 35.76 0 0 0 511.8 388z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <title>工资分配与记账</title>
   <style>
     :root {
-      --primary: #6366f1;
-      --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      --expense-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-      --card-bg: rgba(255, 255, 255, 0.88);
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
       --text: #0f172a;
-      --text-sub: #64748b;
-      --border: rgba(226, 232, 240, 0.9);
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --border: #f1f5f9;
+      --border-dark: #e2e8f0;
       
-      --c-life: #3b82f6;
-      --c-life-bg: linear-gradient(145deg, #ffffff 0%, #eff6ff 100%);
-      --c-save: #10b981;
-      --c-save-bg: linear-gradient(145deg, #ffffff 0%, #ecfdf5 100%);
-      --c-fund: #f59e0b;
-      --c-fund-bg: linear-gradient(145deg, #ffffff 0%, #fffbeb 100%);
-      --c-invest: #8b5cf6;
-      --c-invest-bg: linear-gradient(145deg, #ffffff 0%, #f5f3ff 100%);
+      --accent: #0f172a;
+      --expense: #e11d48;
+      
+      --dot-life: #3b82f6;
+      --dot-save: #10b981;
+      --dot-fund: #f59e0b;
+      --dot-invest: #8b5cf6;
+      
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
     }
     
     * { 
@@ -34,218 +40,190 @@
     }
     
     body { 
-      background-color: #f8fafc;
+      background-color: var(--bg); 
       color: var(--text); 
-      padding: 16px 14px 70px; 
-      overflow-x: hidden;
+      padding: env(safe-area-inset-top, 16px) 14px calc(env(safe-area-inset-bottom, 20px) + 40px); 
       min-height: 100vh;
-      background-image: 
-        radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
-        radial-gradient(circle at 90% 90%, rgba(244, 63, 94, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
-      background-attachment: fixed;
+      overflow-x: hidden;
     }
     
-    .container { max-width: 480px; margin: 0 auto; width: 100%; }
+    .container { max-width: 440px; margin: 0 auto; width: 100%; }
     
-    /* 页面头部 */
-    .header-title { 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 10px; 
-      margin: 8px 0 18px; 
+    /* 标题栏 */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 4px 18px;
     }
-    .header-title h1 { 
-      font-size: 1.3rem; 
-      font-weight: 800; 
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .header-logo { 
-      width: 28px; 
-      height: 28px; 
-      filter: drop-shadow(0 3px 6px rgba(99, 102, 241, 0.3));
-    }
-
-    /* 拟物拟态玻璃拟态卡片 */
-    .card { 
-      background: var(--card-bg); 
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 20px; 
-      padding: 18px 16px; 
-      margin-bottom: 14px; 
-      box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02); 
-      border: 1px solid rgba(255, 255, 255, 0.8); 
-      width: 100%;
-    }
-
-    /* 胶囊 Tab 切换 */
-    .tab-nav { 
-      display: flex; 
-      gap: 6px; 
-      background: rgba(241, 245, 249, 0.85); 
-      padding: 5px; 
-      border-radius: 14px; 
-      margin-bottom: 14px; 
-    }
-    .tab-btn { 
-      flex: 1; 
-      padding: 9px 0; 
-      text-align: center; 
-      border-radius: 10px; 
-      background: transparent; 
-      color: var(--text-sub); 
-      border: none; 
-      font-weight: 700; 
-      font-size: 0.88rem; 
-      cursor: pointer; 
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .tab-btn.active { 
-      background: #ffffff; 
-      color: var(--primary); 
-      box-shadow: 0 3px 10px rgba(99, 102, 241, 0.12); 
-    }
-    .tab-btn.active-exp { 
-      background: #ffffff; 
-      color: #e11d48; 
-      box-shadow: 0 3px 10px rgba(225, 29, 72, 0.12); 
-    }
-
-    /* 输入控件 */
-    .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; width: 100%; }
-    .input-field { width: 100%; min-width: 0; }
-    .input-field label { 
-      display: block; 
-      font-size: 0.8rem; 
-      font-weight: 700; 
-      color: var(--text-sub); 
-      margin-bottom: 5px; 
-    }
-    .input-group input, .input-group select {
-      display: block; 
-      width: 100%; 
-      max-width: 100%; 
-      min-width: 0; 
-      padding: 12px 14px; 
-      border: 1.5px solid var(--border); 
-      border-radius: 12px; 
-      font-size: 0.95rem; 
-      outline: none; 
-      background: rgba(248, 250, 252, 0.8); 
-      transition: all 0.2s ease;
-      -webkit-appearance: none; 
-      appearance: none;
+    .app-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
       color: var(--text);
     }
-    .input-group input:focus, .input-group select:focus {
-      background: #ffffff;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3.5px rgba(99, 102, 241, 0.15);
+    .btn-ratio-setting {
+      background: #f1f5f9;
+      border: none;
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
     }
-    input[type="month"], input[type="date"] { height: 46px; line-height: 20px; }
+    .btn-ratio-setting:active { background: #e2e8f0; }
 
-    /* 按钮 */
-    .btn { 
-      background: var(--primary-gradient); 
-      color: white; 
-      border: none; 
-      padding: 11px 16px; 
-      border-radius: 12px; 
-      font-weight: 700; 
-      font-size: 0.94rem; 
-      cursor: pointer; 
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
-      transition: transform 0.1s, opacity 0.2s, box-shadow 0.2s;
-      letter-spacing: 0.2px;
+    /* 极简卡片 */
+    .card { 
+      background: var(--card-bg); 
+      border-radius: var(--radius-lg); 
+      padding: 18px 16px; 
+      margin-bottom: 12px; 
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 6px 16px rgba(0, 0, 0, 0.02); 
+      border: 1px solid rgba(226, 232, 240, 0.7); 
+      width: 100%;
     }
-    .btn-exp { 
-      background: var(--expense-gradient); 
-      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
-    }
-    .btn:active { transform: scale(0.97); opacity: 0.9; }
-    .btn-danger { background: #fee2e2; color: #dc2626; padding: 5px 9px; font-size: 0.76rem; border-radius: 8px; box-shadow: none; font-weight: 600; }
-    .btn-edit { background: #f1f5f9; color: var(--text-sub); padding: 5px 9px; font-size: 0.76rem; border-radius: 8px; box-shadow: none; font-weight: 600; }
 
     /* 资金池仪表盘 */
     .dashboard-header {
       display: flex; 
       justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 12px;
+      align-items: baseline; 
+      margin-bottom: 14px;
     }
-    .dashboard-header strong { font-size: 0.95rem; font-weight: 800; color: #1e293b; }
-    .btn-config {
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      background: #eef2ff;
-      color: var(--primary);
-      font-size: 0.76rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      transition: all 0.2s;
-    }
-    .btn-config:active { background: #e0e7ff; transform: scale(0.95); }
+    .dashboard-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .dashboard-total { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 
-    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .summary-item { 
-      padding: 13px 12px; 
-      border-radius: 14px; 
+      padding: 12px 12px 14px; 
+      border-radius: var(--radius-md); 
+      background: #fafafa;
+      border: 1px solid var(--border);
       min-width: 0; 
       cursor: pointer; 
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
       transition: all 0.15s ease;
     }
-    .summary-item:active { transform: scale(0.97); }
-    .summary-item.life { background: var(--c-life-bg); border-color: rgba(59, 130, 246, 0.2); }
-    .summary-item.save { background: var(--c-save-bg); border-color: rgba(16, 185, 129, 0.2); }
-    .summary-item.fund { background: var(--c-fund-bg); border-color: rgba(245, 158, 11, 0.2); }
-    .summary-item.invest { background: var(--c-invest-bg); border-color: rgba(139, 92, 246, 0.2); }
+    .summary-item:active { background: #f1f5f9; transform: scale(0.98); }
     
     .summary-item-header { display: flex; justify-content: space-between; align-items: center; }
-    .summary-item .label { font-size: 0.78rem; font-weight: 800; }
-    .summary-item.life .label { color: #2563eb; }
-    .summary-item.save .label { color: #059669; }
-    .summary-item.fund .label { color: #d97706; }
-    .summary-item.invest .label { color: #7c3aed; }
-
+    .summary-title-wrap { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .dot.life { background: var(--dot-life); }
+    .dot.save { background: var(--dot-save); }
+    .dot.fund { background: var(--dot-fund); }
+    .dot.invest { background: var(--dot-invest); }
+    
+    .summary-item .label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
     .ratio-tag {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 2px 7px;
-      border-radius: 8px;
       font-size: 0.72rem;
-      font-weight: 800;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-    .summary-item.life .ratio-tag { color: var(--c-life); }
-    .summary-item.save .ratio-tag { color: var(--c-save); }
-    .summary-item.fund .ratio-tag { color: var(--c-fund); }
-    .summary-item.invest .ratio-tag { color: var(--c-invest); }
-
-    .summary-item .val { font-size: 1.15rem; font-weight: 800; margin-top: 6px; letter-spacing: -0.5px; }
-    .summary-sub { font-size: 0.7rem; color: var(--text-sub); margin-top: 3px; font-weight: 600; opacity: 0.85; }
-
-    /* 筛选条 */
-    .filter-grid { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 6px; margin-bottom: 12px; width: 100%; }
-    .filter-grid select {
-      width: 100%; 
-      min-width: 0; 
-      padding: 8px 4px; 
-      border-radius: 10px; 
-      border: 1.5px solid var(--border); 
-      font-size: 0.8rem; 
-      background: rgba(248, 250, 252, 0.9); 
       font-weight: 700;
+      color: var(--text-dim);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .summary-item .val { 
+      font-size: 1.12rem; 
+      font-weight: 800; 
+      margin-top: 6px; 
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .summary-sub { font-size: 0.68rem; color: var(--text-dim); margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+    /* 录入 Tab 切换 */
+    .tab-nav { 
+      display: flex; 
+      gap: 4px; 
+      background: #f1f5f9; 
+      padding: 3px; 
+      border-radius: 12px; 
+      margin-bottom: 14px; 
+    }
+    .tab-btn { 
+      flex: 1; 
+      padding: 8px 0; 
+      text-align: center; 
+      border-radius: 9px; 
+      background: transparent; 
+      color: var(--text-muted); 
+      border: none; 
+      font-weight: 600; 
+      font-size: 0.82rem; 
+      cursor: pointer; 
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tab-btn.active { 
+      background: #ffffff; 
+      color: var(--text); 
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); 
+    }
+
+    /* 输入控件 */
+    .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; width: 100%; }
+    .input-field { width: 100%; min-width: 0; }
+    .input-field label { 
+      display: block; 
+      font-size: 0.76rem; 
+      font-weight: 600; 
+      color: var(--text-muted); 
+      margin-bottom: 5px; 
+    }
+    .input-group input, .input-group select {
+      display: block; 
+      width: 100%; 
+      padding: 11px 12px; 
+      border: 1px solid var(--border-dark); 
+      border-radius: 10px; 
+      font-size: 0.92rem; 
+      outline: none; 
+      background: #fafafa; 
       color: var(--text);
+      transition: all 0.15s;
+      -webkit-appearance: none; 
+      appearance: none;
+    }
+    .input-group input:focus, .input-group select:focus {
+      background: #ffffff;
+      border-color: var(--text);
+    }
+    input[type="month"], input[type="date"] { height: 42px; line-height: 20px; }
+
+    /* 按钮系统 */
+    .btn-main { 
+      width: 100%;
+      background: var(--accent); 
+      color: #ffffff; 
+      border: none; 
+      padding: 12px 16px; 
+      border-radius: 10px; 
+      font-weight: 600; 
+      font-size: 0.9rem; 
+      cursor: pointer; 
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-main.exp { background: var(--expense); }
+    .btn-main:active { opacity: 0.85; transform: scale(0.99); }
+    
+    .btn-action-del { background: transparent; color: #ef4444; border: 1px solid #fee2e2; padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; }
+    .btn-action-edit { background: #f8fafc; color: var(--text-muted); border: 1px solid var(--border-dark); padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; }
+
+    /* 历史筛选栏 */
+    .filter-bar { display: flex; gap: 6px; margin-bottom: 10px; width: 100%; }
+    .filter-bar select {
+      flex: 1;
+      padding: 6px 6px; 
+      border-radius: 8px; 
+      border: 1px solid var(--border-dark); 
+      font-size: 0.78rem; 
+      background: #fafafa; 
+      font-weight: 600;
+      color: var(--text-muted);
       text-overflow: ellipsis; 
       white-space: nowrap; 
       overflow: hidden; 
@@ -254,70 +232,124 @@
       text-align: center;
       outline: none;
     }
-    .filter-grid select:focus { border-color: var(--primary); }
-    
+
     .record-container { max-height: 420px; width: 100%; }
     .record-container.has-data { overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .record-container.is-empty { overflow: hidden; }
     
-    .empty-state { padding: 40px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.85rem; gap: 6px; font-weight: 600; }
+    .empty-state { padding: 36px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.82rem; gap: 4px; }
 
-    /* 明细卡片条目 */
-    .record-item { border-bottom: 1px solid var(--border); padding: 13px 0; }
+    /* 明细流水卡片 */
+    .record-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
     .record-item:last-child { border-bottom: none; }
-    .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .record-date { font-weight: 800; font-size: 0.92rem; color: #1e293b; }
-    .record-total { font-weight: 800; color: var(--primary); font-size: 1.02rem; }
-    .record-total.exp-val { color: #e11d48; }
+    .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .record-date { font-weight: 700; font-size: 0.88rem; }
+    .record-amount { font-weight: 800; font-size: 0.96rem; font-variant-numeric: tabular-nums; }
+    .record-amount.in { color: var(--text); }
+    .record-amount.out { color: var(--expense); }
     
-    .record-tags { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.76rem; color: var(--text-sub); }
-    .record-tags span { background: #f8fafc; padding: 5px 8px; border-radius: 8px; border: 1px solid #f1f5f9; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-    .record-note { font-size: 0.8rem; color: #be123c; margin-top: 6px; background: #fff1f2; padding: 4px 8px; border-radius: 6px; display: inline-block; word-break: break-all; font-weight: 600; }
+    .record-tags { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.74rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .record-tags span { background: #fafafa; padding: 4px 6px; border-radius: 6px; }
+    .record-note { font-size: 0.78rem; color: var(--expense); margin-top: 5px; display: inline-block; word-break: break-all; }
     .record-actions { margin-top: 8px; display: flex; justify-content: flex-end; gap: 6px; }
 
-    /* 弹窗设计 */
+    /* 弹窗系统 */
     .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); padding: 16px;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s ease; padding: 16px;
     }
     .modal-overlay.active { opacity: 1; visibility: visible; }
     .modal-box {
-      background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; width: 100%; max-width: 330px; padding: 22px; text-align: center; transform: scale(0.92); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.12); border: 1px solid rgba(255, 255, 255, 0.8);
+      background: #ffffff; border-radius: var(--radius-lg); width: 100%; max-width: 320px; padding: 20px; text-align: center; transform: scale(0.95); transition: transform 0.2s ease; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08); border: 1px solid rgba(226, 232, 240, 0.8);
     }
     .modal-overlay.active .modal-box { transform: scale(1); }
-    .modal-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 14px; }
+    .modal-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 14px; }
     
     .ratio-setting-row {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.9rem; font-weight: 700;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.88rem; font-weight: 600;
     }
-    .ratio-stepper { display: flex; align-items: center; gap: 8px; }
+    .ratio-stepper { display: flex; align-items: center; gap: 6px; }
     .step-btn {
-      width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: #f8fafc; font-weight: 800; font-size: 1.15rem; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+      width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-dark); background: #ffffff; font-weight: 700; font-size: 1.1rem; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
-    .step-btn:active { background: #e2e8f0; transform: scale(0.93); }
-    .step-val { width: 48px; text-align: center; font-weight: 800; font-size: 1.05rem; color: var(--primary); }
+    .step-btn:active { background: #f1f5f9; }
+    .step-val { width: 44px; text-align: center; font-weight: 700; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 标题 Logo -->
-  <div class="header-title">
-    <svg class="header-logo" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
-      <path d="M708 460a36 36 0 0 0 36-36 36 36 0 0 0-36-36H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v72H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v142.91A33.08 33.08 0 0 0 509.09 780h5.82A33.08 33.08 0 0 0 548 746.91V604h160a36 36 0 0 0 36-36 36 36 0 0 0-36-36H548v-72z" fill="#6366f1"></path>
-      <path d="M511.8 388a35.33 35.33 0 0 0 25.28-10.4l72.56-72.8a35.83 35.83 0 0 0 0-50.4 35.52 35.52 0 0 0-50.23 0l-47.13 47.29-47-47.18a35.93 35.93 0 0 0-50.78 0 36.22 36.22 0 0 0 0 51l71.76 72A35.76 35.76 0 0 0 511.8 388z" fill="#6366f1"></path>
-      <path d="M100 400.71h144a36 36 0 0 0 36-36 36 36 0 0 0-36-36h-60.33C248 213.74 370.9 136 512 136c195.76 0 356.57 149.6 374.36 340.71H886a36 36 0 0 0 36 36 36 36 0 0 0 36-36h0.6C940.63 245.79 747.55 64 512 64c-157.59 0-296.14 81.38-376 204.39v-47.68a36 36 0 0 0-36-36 36 36 0 0 0-36 36v144a36 36 0 0 0 36 36zM924 624.71H780a36 36 0 0 0-36 36 36 0 0 0 36 36h59.51C775 810.9 652.51 888 512 888c-195.27 0-355.77-148.86-374.22-339.29h-0.29a36 36 0 0 0-36-36 36 36 0 0 0-36 36C84.17 779 276.94 960 512 960c157.58 0 296.15-81.37 376-204.38v49.09a36 36 0 0 0 36 36 36 36 0 0 0 36-36v-144a36 36 0 0 0-36-36z" fill="#6366f1"></path>
-    </svg>
-    <h1>工资智能分配与记账</h1>
-  </div>
+  <!-- 标题与配置入口 -->
+  <header class="app-header">
+    <div class="app-title">资产分配</div>
+    <button class="btn-ratio-setting" onclick="openRatioModal()">配比设定</button>
+  </header>
+
+  <!-- 账户净余额池卡片 -->
+  <section class="card">
+    <div class="dashboard-header">
+      <span class="dashboard-label">净资产总池</span>
+      <span class="dashboard-total" id="balanceSummaryTotal">¥0.00</span>
+    </div>
+    <div class="summary-grid">
+      <!-- 1. 生活 -->
+      <div class="summary-item" onclick="openRatioModal()">
+        <div class="summary-item-header">
+          <div class="summary-title-wrap">
+            <span class="dot life"></span>
+            <span class="label">日常生活</span>
+          </div>
+          <span class="ratio-tag" id="summaryLabel-life">40%</span>
+        </div>
+        <div class="val" id="balLife">¥0.00</div>
+        <div class="summary-sub" id="subLife">入¥0 | 支¥0</div>
+      </div>
+      <!-- 2. 存储 -->
+      <div class="summary-item" onclick="openRatioModal()">
+        <div class="summary-item-header">
+          <div class="summary-title-wrap">
+            <span class="dot save"></span>
+            <span class="label">必须存储</span>
+          </div>
+          <span class="ratio-tag" id="summaryLabel-save">30%</span>
+        </div>
+        <div class="val" id="balSave">¥0.00</div>
+        <div class="summary-sub" id="subSave">入¥0 | 支¥0</div>
+      </div>
+      <!-- 3. 备用金 -->
+      <div class="summary-item" onclick="openRatioModal()">
+        <div class="summary-item-header">
+          <div class="summary-title-wrap">
+            <span class="dot fund"></span>
+            <span class="label">备用金</span>
+          </div>
+          <span class="ratio-tag" id="summaryLabel-fund">20%</span>
+        </div>
+        <div class="val" id="balFund">¥0.00</div>
+        <div class="summary-sub" id="subFund">入¥0 | 支¥0</div>
+      </div>
+      <!-- 4. 理财 -->
+      <div class="summary-item" onclick="openRatioModal()">
+        <div class="summary-item-header">
+          <div class="summary-title-wrap">
+            <span class="dot invest"></span>
+            <span class="label">理财</span>
+          </div>
+          <span class="ratio-tag" id="summaryLabel-invest">10%</span>
+        </div>
+        <div class="val" id="balInvest">¥0.00</div>
+        <div class="summary-sub" id="subInvest">入¥0 | 支¥0</div>
+      </div>
+    </div>
+  </section>
 
   <!-- 录入模块 -->
-  <div class="card">
+  <section class="card">
     <div class="tab-nav">
-      <button class="tab-btn active" id="tabSalaryBtn" onclick="switchForm('salary')">💰 工资分配</button>
-      <button class="tab-btn" id="tabExpenseBtn" onclick="switchForm('expense')">💸 记一笔支出</button>
+      <button class="tab-btn active" id="tabSalaryBtn" onclick="switchForm('salary')">工资入账</button>
+      <button class="tab-btn" id="tabExpenseBtn" onclick="switchForm('expense')">支出扣减</button>
     </div>
 
-    <!-- 工资分配表单 -->
+    <!-- 工资表单 -->
     <div id="salaryForm">
       <div class="input-group">
         <div class="input-field">
@@ -325,14 +357,14 @@
           <input type="month" id="salaryMonth">
         </div>
         <div class="input-field">
-          <label>工资金额 (¥)</label>
-          <input type="number" id="salaryAmount" placeholder="输入金额，如: 8000" min="0" step="0.01" inputmode="decimal">
+          <label>入账金额 (¥)</label>
+          <input type="number" id="salaryAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
         </div>
       </div>
-      <button class="btn" style="width: 100%; padding: 13px; font-size: 0.96rem;" onclick="addOrUpdateSalary()">✨ 智能分配并记入账户</button>
+      <button class="btn-main" onclick="addOrUpdateSalary()">按当前比例分配入账</button>
     </div>
 
-    <!-- 支出记账表单 -->
+    <!-- 支出表单 -->
     <div id="expenseForm" style="display: none;">
       <div class="input-group">
         <div class="input-field">
@@ -342,79 +374,28 @@
         <div class="input-field">
           <label>支出账户</label>
           <select id="expenseAccount">
-            <option value="life" id="opt-life">生活</option>
-            <option value="save" id="opt-save">存储</option>
+            <option value="life" id="opt-life">日常生活</option>
+            <option value="save" id="opt-save">必须存储</option>
             <option value="fund" id="opt-fund">备用金</option>
             <option value="invest" id="opt-invest">理财</option>
           </select>
         </div>
         <div class="input-field">
           <label>支出金额 (¥)</label>
-          <input type="number" id="expenseAmount" placeholder="输入支出金额" min="0" step="0.01" inputmode="decimal">
+          <input type="number" id="expenseAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
         </div>
         <div class="input-field">
-          <label>支出备注 / 用途</label>
-          <input type="text" id="expenseNote" placeholder="如: 超市买菜、餐饮等">
+          <label>用途备注</label>
+          <input type="text" id="expenseNote" placeholder="如：餐饮、超市等">
         </div>
       </div>
-      <button class="btn btn-exp" style="width: 100%; padding: 13px; font-size: 0.96rem;" onclick="addExpense()">确认支出并扣减</button>
+      <button class="btn-main exp" onclick="addExpense()">确认支出扣减</button>
     </div>
-  </div>
+  </section>
 
-  <!-- 资金池当前剩余余额汇总 -->
-  <div class="card">
-    <div class="dashboard-header">
-      <div>
-        <strong>当前账户净余额池</strong>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:0.8rem; font-weight:800; color:var(--primary);" id="balanceSummaryTotal">净余额 ¥0.00</span>
-        <button class="btn-config" onclick="openRatioModal()">配比 ⚙️</button>
-      </div>
-    </div>
-    <div class="summary-grid">
-      <!-- 生活 -->
-      <div class="summary-item life" onclick="openRatioModal()">
-        <div class="summary-item-header">
-          <span class="label">生活</span>
-          <span class="ratio-tag" id="summaryLabel-life">40%</span>
-        </div>
-        <div class="val" id="balLife">¥0.00</div>
-        <div class="summary-sub" id="subLife">入¥0 | 支¥0</div>
-      </div>
-      <!-- 存储 -->
-      <div class="summary-item save" onclick="openRatioModal()">
-        <div class="summary-item-header">
-          <span class="label">存储</span>
-          <span class="ratio-tag" id="summaryLabel-save">30%</span>
-        </div>
-        <div class="val" id="balSave">¥0.00</div>
-        <div class="summary-sub" id="subSave">入¥0 | 支¥0</div>
-      </div>
-      <!-- 备用金 -->
-      <div class="summary-item fund" onclick="openRatioModal()">
-        <div class="summary-item-header">
-          <span class="label">备用金</span>
-          <span class="ratio-tag" id="summaryLabel-fund">20%</span>
-        </div>
-        <div class="val" id="balFund">¥0.00</div>
-        <div class="summary-sub" id="subFund">入¥0 | 支¥0</div>
-      </div>
-      <!-- 理财 -->
-      <div class="summary-item invest" onclick="openRatioModal()">
-        <div class="summary-item-header">
-          <span class="label">理财</span>
-          <span class="ratio-tag" id="summaryLabel-invest">10%</span>
-        </div>
-        <div class="val" id="balInvest">¥0.00</div>
-        <div class="summary-sub" id="subInvest">入¥0 | 支¥0</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 历史明细卡片 -->
-  <div class="card">
-    <div class="filter-grid">
+  <!-- 历史流水卡片 -->
+  <section class="card">
+    <div class="filter-bar">
       <select id="listTypeFilter" onchange="render()">
         <option value="all">全部类型</option>
         <option value="salary">工资</option>
@@ -428,18 +409,18 @@
       </select>
     </div>
 
-    <!-- 明细展示区 -->
+    <!-- 流水列表 -->
     <div class="record-container" id="recordList"></div>
-  </div>
+  </section>
 </div>
 
-<!-- 弹窗：方案 A 严格均摊联动 (当前 ±3%，其余三项各严格 ±1%) -->
+<!-- 弹窗 1：比例微调 (主项 ±3%，其余三项各 ±1%) -->
 <div class="modal-overlay" id="ratioModal">
   <div class="modal-box">
-    <div class="modal-title">⚙️ 调整分配比例 (全员同时联动)</div>
+    <div class="modal-title">调整分配比例</div>
     
     <div class="ratio-setting-row">
-      <span>生活</span>
+      <span>日常生活</span>
       <div class="ratio-stepper">
         <button class="step-btn" onclick="stepPlanA('life', -3)">-</button>
         <span class="step-val" id="mVal-life">40%</span>
@@ -448,7 +429,7 @@
     </div>
     
     <div class="ratio-setting-row">
-      <span>存储</span>
+      <span>必须存储</span>
       <div class="ratio-stepper">
         <button class="step-btn" onclick="stepPlanA('save', -3)">-</button>
         <span class="step-val" id="mVal-save">30%</span>
@@ -474,29 +455,28 @@
       </div>
     </div>
 
-    <div style="margin: 14px 0 16px; padding: 10px; background: #ecfdf5; border-radius: 12px; font-size: 0.78rem; color: #059669; font-weight: 700;">
-      ✓ 当前项 ±3%，其余 3 个账户各自严格 ±1% 同步联动
+    <div style="margin: 14px 0 16px; font-size: 0.75rem; color: var(--text-dim);">
+      调整任意项 ±3%，其余项各自动均衡 ±1%
     </div>
 
-    <button class="btn" style="width: 100%; padding: 12px;" onclick="closeRatioModal()">完成</button>
+    <button class="btn-main" onclick="closeRatioModal()">完成</button>
   </div>
 </div>
 
-<!-- 弹窗：自定义删除确认弹窗 -->
+<!-- 弹窗 2：删除确认 -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-box">
-    <div style="font-size: 2rem; margin-bottom: 8px;">🗑️</div>
-    <div class="modal-title">确认删除？</div>
-    <div style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 18px; line-height: 1.4; font-weight: 500;" id="modalMsgText">删除后该记录将不可恢复。</div>
-    <div style="display: flex; gap: 10px;">
-      <button class="btn" style="flex:1; background:#f1f5f9; color:var(--text-sub); box-shadow:none;" onclick="closeDeleteModal()">取消</button>
-      <button class="btn btn-danger" style="flex:1; padding:11px;" id="confirmDeleteBtn">确认删除</button>
+    <div class="modal-title" style="margin-bottom: 6px;">确认删除？</div>
+    <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.4;" id="modalMsgText">删除后该记录将不可恢复。</div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-main" style="background:#f1f5f9; color:var(--text-muted);" onclick="closeDeleteModal()">取消</button>
+      <button class="btn-main exp" id="confirmDeleteBtn">删除</button>
     </div>
   </div>
 </div>
 
 <script>
-  const RATIO_STORAGE_KEY = 'salary_ratios_planA_v8';
+  const RATIO_STORAGE_KEY = 'salary_ratios_minimal_v1';
   let defaultRatios = { life: 40, save: 30, fund: 20, invest: 10 };
   let ratios = JSON.parse(localStorage.getItem(RATIO_STORAGE_KEY)) || defaultRatios;
 
@@ -507,8 +487,8 @@
 
   const orderKeys = ['life', 'save', 'fund', 'invest'];
   const accountNames = {
-    life: '生活',
-    save: '存储',
+    life: '日常生活',
+    save: '必须存储',
     fund: '备用金',
     invest: '理财'
   };
@@ -534,7 +514,7 @@
     document.getElementById('ratioModal').classList.remove('active');
   }
 
-  // 方案 A 联动算法：主项 ±3%，其余 3 项各自严格 ±1%
+  // 方案 A 联动逻辑：主项 ±3%，其余 3 项各分摊 ±1%
   function stepPlanA(targetKey, delta) {
     const curVal = ratios[targetKey];
     const nextVal = curVal + delta;
@@ -571,7 +551,7 @@
     orderKeys.forEach(k => {
       const val = ratios[k];
       document.getElementById(`summaryLabel-${k}`).innerText = `${val}%`;
-      document.getElementById(`opt-${k}`).innerText = `${accountNames[k]} (${val}% 池)`;
+      document.getElementById(`opt-${k}`).innerText = `${accountNames[k]} (${val}%)`;
     });
   }
 
@@ -588,7 +568,7 @@
       eForm.style.display = 'none';
     } else {
       sBtn.className = 'tab-btn';
-      eBtn.className = 'tab-btn active-exp';
+      eBtn.className = 'tab-btn active';
       sForm.style.display = 'none';
       eForm.style.display = 'block';
     }
@@ -673,7 +653,7 @@
 
   function triggerDelete(id, type, desc) {
     pendingDelete = { id, type };
-    document.getElementById('modalMsgText').innerText = `确定删除这笔【${desc}】吗？删除后余额将重新计算。`;
+    document.getElementById('modalMsgText').innerText = `确定删除【${desc}】吗？删除后余额将重新计算。`;
     document.getElementById('confirmModal').classList.add('active');
   }
 
@@ -775,7 +755,7 @@
     document.getElementById('balInvest').innerText = `¥${netInvest.toFixed(2)}`;
     document.getElementById('subInvest').innerText = `入¥${totalIn.invest.toFixed(0)} | 支¥${totalOut.invest.toFixed(0)}`;
 
-    document.getElementById('balanceSummaryTotal').innerText = `净余额 ¥${netTotal.toFixed(2)}`;
+    document.getElementById('balanceSummaryTotal').innerText = `¥${netTotal.toFixed(2)}`;
 
     const yearFilter = document.getElementById('yearFilter').value;
     const monthFilter = document.getElementById('monthFilter').value;
@@ -807,8 +787,8 @@
       listEl.className = 'record-container is-empty';
       listEl.innerHTML = `
         <div class="empty-state">
-          <div style="font-size: 2rem;">📭</div>
-          <div>暂无明细记录</div>
+          <div style="font-size: 1.5rem; opacity: 0.5;">—</div>
+          <div>暂无明细流水</div>
         </div>
       `;
       return;
@@ -821,8 +801,8 @@
         return `
           <div class="record-item">
             <div class="record-header">
-              <span class="record-date">📥 ${r.month} 工资分配</span>
-              <span class="record-total">+¥${Number(r.total).toFixed(2)}</span>
+              <span class="record-date">${r.month} 工资入账</span>
+              <span class="record-amount in">+¥${Number(r.total).toFixed(2)}</span>
             </div>
             <div class="record-tags">
               <span>生活(${snap.life}%): ¥${Number(r.life).toFixed(2)}</span>
@@ -831,8 +811,8 @@
               <span>理财(${snap.invest}%): ¥${Number(r.invest).toFixed(2)}</span>
             </div>
             <div class="record-actions">
-              <button class="btn btn-edit" onclick="editSalary(${r.id})">修改</button>
-              <button class="btn btn-danger" onclick="triggerDelete(${r.id}, 'salary', '${r.month} 工资分配')">删除</button>
+              <button class="btn-action-edit" onclick="editSalary(${r.id})">编辑</button>
+              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'salary', '${r.month} 工资分配')">删除</button>
             </div>
           </div>
         `;
@@ -840,15 +820,12 @@
         return `
           <div class="record-item">
             <div class="record-header">
-              <span class="record-date">📤 ${r.date} 支出</span>
-              <span class="record-total exp-val">-¥${Number(r.amount).toFixed(2)}</span>
+              <span class="record-date">${r.date} ${accountNames[r.account] || r.account}</span>
+              <span class="record-amount out">-¥${Number(r.amount).toFixed(2)}</span>
             </div>
-            <div style="font-size:0.82rem; color:var(--text-sub); margin-bottom:4px;">
-              扣除账户：<strong>${accountNames[r.account] || r.account}</strong>
-            </div>
-            <div class="record-note">📝 备注：${r.note}</div>
+            <div class="record-note">${r.note}</div>
             <div class="record-actions">
-              <button class="btn btn-danger" onclick="triggerDelete(${r.id}, 'expense', '${r.date} 支出 ¥${Number(r.amount).toFixed(2)}')">删除</button>
+              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'expense', '${r.date} 支出 ¥${Number(r.amount).toFixed(2)}')">删除</button>
             </div>
           </div>
         `;
