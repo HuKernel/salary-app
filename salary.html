@@ -28,7 +28,6 @@
       
       --radius-lg: 20px;
       --radius-md: 12px;
-      --radius-sm: 8px;
     }
     
     * { 
@@ -49,7 +48,6 @@
     
     .container { max-width: 440px; margin: 0 auto; width: 100%; }
     
-    /* 标题栏与右上角按钮组 */
     .app-header {
       display: flex;
       align-items: center;
@@ -83,7 +81,6 @@
     }
     .btn-header-action:active { background: #e2e8f0; }
 
-    /* 极简卡片 */
     .card { 
       background: var(--card-bg); 
       border-radius: var(--radius-lg); 
@@ -94,7 +91,6 @@
       width: 100%;
     }
 
-    /* 资金池仪表盘 */
     .dashboard-header {
       display: flex; 
       justify-content: space-between; 
@@ -141,7 +137,6 @@
     }
     .summary-sub { font-size: 0.68rem; color: var(--text-dim); margin-top: 3px; font-variant-numeric: tabular-nums; }
 
-    /* 录入 Tab 切换 */
     .tab-nav { 
       display: flex; 
       gap: 4px; 
@@ -169,7 +164,6 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); 
     }
 
-    /* 输入控件 */
     .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; width: 100%; }
     .input-field { width: 100%; min-width: 0; }
     .input-field label { 
@@ -199,7 +193,6 @@
     }
     input[type="month"], input[type="date"], input[type="time"] { height: 42px; line-height: 20px; }
 
-    /* 按钮系统 */
     .btn-main { 
       width: 100%;
       background: var(--accent); 
@@ -218,7 +211,6 @@
     .btn-action-del { background: transparent; color: #ef4444; border: 1px solid #fee2e2; padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; }
     .btn-action-edit { background: #f8fafc; color: var(--text-muted); border: 1px solid var(--border-dark); padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; }
 
-    /* 历史筛选栏 */
     .filter-bar { display: flex; gap: 6px; margin-bottom: 10px; width: 100%; }
     .filter-bar select {
       flex: 1;
@@ -244,7 +236,6 @@
     
     .empty-state { padding: 36px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.82rem; gap: 4px; }
 
-    /* 明细流水卡片 */
     .record-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
     .record-item:last-child { border-bottom: none; }
     .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
@@ -258,13 +249,12 @@
     .record-note { font-size: 0.78rem; color: var(--expense); margin-top: 5px; display: inline-block; word-break: break-all; }
     .record-actions { margin-top: 8px; display: flex; justify-content: flex-end; gap: 6px; }
 
-    /* 弹窗系统 */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s ease; padding: 16px;
     }
     .modal-overlay.active { opacity: 1; visibility: visible; }
     .modal-box {
-      background: #ffffff; border-radius: var(--radius-lg); width: 100%; max-width: 320px; padding: 20px; text-align: center; transform: scale(0.95); transition: transform 0.2s ease; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08); border: 1px solid rgba(226, 232, 240, 0.8);
+      background: #ffffff; border-radius: var(--radius-lg); width: 100%; max-width: 330px; padding: 20px; text-align: center; transform: scale(0.95); transition: transform 0.2s ease; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08); border: 1px solid rgba(226, 232, 240, 0.8); max-height: 90vh; overflow-y: auto;
     }
     .modal-overlay.active .modal-box { transform: scale(1); }
     .modal-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 14px; }
@@ -283,7 +273,6 @@
 <body>
 
 <div class="container">
-  <!-- 标题与操作栏 -->
   <header class="app-header">
     <div class="app-title">资产分配</div>
     <div class="header-actions">
@@ -292,56 +281,40 @@
     </div>
   </header>
 
-  <!-- 账户净余额池卡片 -->
+  <!-- 净资产汇总 -->
   <section class="card">
     <div class="dashboard-header">
       <span class="dashboard-label">净资产总池</span>
       <span class="dashboard-total" id="balanceSummaryTotal">¥0.00</span>
     </div>
     <div class="summary-grid">
-      <!-- 1. 生活 -->
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
-          <div class="summary-title-wrap">
-            <span class="dot life"></span>
-            <span class="label">日常生活</span>
-          </div>
+          <div class="summary-title-wrap"><span class="dot life"></span><span class="label">日常生活</span></div>
           <span class="ratio-tag" id="summaryLabel-life">40%</span>
         </div>
         <div class="val" id="balLife">¥0.00</div>
         <div class="summary-sub" id="subLife">入¥0 | 支¥0</div>
       </div>
-      <!-- 2. 存储 -->
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
-          <div class="summary-title-wrap">
-            <span class="dot save"></span>
-            <span class="label">必须存储</span>
-          </div>
+          <div class="summary-title-wrap"><span class="dot save"></span><span class="label">必须存储</span></div>
           <span class="ratio-tag" id="summaryLabel-save">30%</span>
         </div>
         <div class="val" id="balSave">¥0.00</div>
         <div class="summary-sub" id="subSave">入¥0 | 支¥0</div>
       </div>
-      <!-- 3. 备用金 -->
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
-          <div class="summary-title-wrap">
-            <span class="dot fund"></span>
-            <span class="label">备用金</span>
-          </div>
+          <div class="summary-title-wrap"><span class="dot fund"></span><span class="label">备用金</span></div>
           <span class="ratio-tag" id="summaryLabel-fund">20%</span>
         </div>
         <div class="val" id="balFund">¥0.00</div>
         <div class="summary-sub" id="subFund">入¥0 | 支¥0</div>
       </div>
-      <!-- 4. 理财 -->
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
-          <div class="summary-title-wrap">
-            <span class="dot invest"></span>
-            <span class="label">理财</span>
-          </div>
+          <div class="summary-title-wrap"><span class="dot invest"></span><span class="label">理财</span></div>
           <span class="ratio-tag" id="summaryLabel-invest">10%</span>
         </div>
         <div class="val" id="balInvest">¥0.00</div>
@@ -357,7 +330,6 @@
       <button class="tab-btn" id="tabExpenseBtn" onclick="switchForm('expense')">支出扣减</button>
     </div>
 
-    <!-- 工资表单 -->
     <div id="salaryForm">
       <div class="input-group">
         <div class="input-field">
@@ -372,7 +344,6 @@
       <button class="btn-main" onclick="addOrUpdateSalary()">按当前比例分配入账</button>
     </div>
 
-    <!-- 支出表单 -->
     <div id="expenseForm" style="display: none;">
       <div class="input-group">
         <div class="input-field">
@@ -401,7 +372,7 @@
     </div>
   </section>
 
-  <!-- 历史流水卡片 -->
+  <!-- 列表 -->
   <section class="card">
     <div class="filter-bar">
       <select id="listTypeFilter" onchange="render()">
@@ -416,24 +387,20 @@
         <option value="all">全部月</option>
       </select>
     </div>
-
-    <!-- 流水列表 -->
     <div class="record-container" id="recordList"></div>
   </section>
 </div>
 
-<!-- 弹窗 1：直接系统弹窗提醒设置 -->
+<!-- 弹窗 1：提醒设置 -->
 <div class="modal-overlay" id="reminderModal">
   <div class="modal-box">
     <div class="modal-title">设置提醒</div>
     
-    <!-- 弹窗内部 Tab 切换 -->
     <div class="tab-nav" style="margin-bottom: 16px;">
       <button class="tab-btn active" id="tabRemindDailyBtn" onclick="switchRemindTab('daily')">📅 每日记账</button>
       <button class="tab-btn" id="tabRemindSalaryBtn" onclick="switchRemindTab('salary')">💰 发薪分配</button>
     </div>
 
-    <!-- 子面板 A：每日记账提醒 -->
     <div id="remindDailyPanel">
       <div class="input-group" style="text-align: left; margin-bottom: 14px;">
         <div class="input-field">
@@ -441,14 +408,12 @@
           <input type="time" id="dailyRemindTime" value="21:30">
         </div>
       </div>
-      <!-- 直接调用系统通知权限 -->
       <button class="btn-main" onclick="enableWebNotification()">🔔 开启直接弹窗通知</button>
       <div style="margin-top: 8px;">
         <button class="btn-action-edit" style="width: 100%; padding: 8px;" onclick="exportDailyCalendar()">或导入系统日历 (.ics)</button>
       </div>
     </div>
 
-    <!-- 子面板 B：每月发薪提醒 -->
     <div id="remindSalaryPanel" style="display: none;">
       <div class="input-group" style="text-align: left; margin-bottom: 14px;">
         <div class="input-field">
@@ -485,7 +450,7 @@
   </div>
 </div>
 
-<!-- 弹窗 2：比例微调 (主项 ±3%，其余三项各 ±1%) -->
+<!-- 弹窗 2：独立调整比例（单独加减 + 100% 校验保存锁） -->
 <div class="modal-overlay" id="ratioModal">
   <div class="modal-box">
     <div class="modal-title">调整分配比例</div>
@@ -493,44 +458,49 @@
     <div class="ratio-setting-row">
       <span>日常生活</span>
       <div class="ratio-stepper">
-        <button class="step-btn" onclick="stepPlanA('life', -3)">-</button>
+        <button class="step-btn" onclick="stepSingleEdit('life', -5)">-</button>
         <span class="step-val" id="mVal-life">40%</span>
-        <button class="step-btn" onclick="stepPlanA('life', 3)">+</button>
+        <button class="step-btn" onclick="stepSingleEdit('life', 5)">+</button>
       </div>
     </div>
     
     <div class="ratio-setting-row">
       <span>必须存储</span>
       <div class="ratio-stepper">
-        <button class="step-btn" onclick="stepPlanA('save', -3)">-</button>
+        <button class="step-btn" onclick="stepSingleEdit('save', -5)">-</button>
         <span class="step-val" id="mVal-save">30%</span>
-        <button class="step-btn" onclick="stepPlanA('save', 3)">+</button>
+        <button class="step-btn" onclick="stepSingleEdit('save', 5)">+</button>
       </div>
     </div>
 
     <div class="ratio-setting-row">
       <span>备用金</span>
       <div class="ratio-stepper">
-        <button class="step-btn" onclick="stepPlanA('fund', -3)">-</button>
+        <button class="step-btn" onclick="stepSingleEdit('fund', -5)">-</button>
         <span class="step-val" id="mVal-fund">20%</span>
-        <button class="step-btn" onclick="stepPlanA('fund', 3)">+</button>
+        <button class="step-btn" onclick="stepSingleEdit('fund', 5)">+</button>
       </div>
     </div>
 
     <div class="ratio-setting-row">
       <span>理财</span>
       <div class="ratio-stepper">
-        <button class="step-btn" onclick="stepPlanA('invest', -3)">-</button>
+        <button class="step-btn" onclick="stepSingleEdit('invest', -5)">-</button>
         <span class="step-val" id="mVal-invest">10%</span>
-        <button class="step-btn" onclick="stepPlanA('invest', 3)">+</button>
+        <button class="step-btn" onclick="stepSingleEdit('invest', 5)">+</button>
       </div>
     </div>
 
-    <div style="margin: 14px 0 16px; font-size: 0.75rem; color: var(--text-dim);">
-      调整任意项 ±3%，其余项各自动均衡 ±1%
+    <!-- 100% 校验提示区 -->
+    <div style="margin: 12px 0 14px; padding: 10px; background: #f8fafc; border-radius: 10px;">
+      <div style="font-size:0.85rem; font-weight:700;">合计：<span id="modalSumDisplay" style="font-size:1rem;">100%</span></div>
+      <div id="modalSumTip" style="font-size:0.72rem; margin-top:2px;"></div>
     </div>
 
-    <button class="btn-main" onclick="closeRatioModal()">完成</button>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-main" style="background:#f1f5f9; color:var(--text-muted); flex:1;" onclick="closeRatioModal()">取消</button>
+      <button class="btn-main" id="btnSaveRatio" style="flex:1;" onclick="saveAndApplyRatios()">确认保存</button>
+    </div>
   </div>
 </div>
 
@@ -547,10 +517,11 @@
 </div>
 
 <script>
-  const RATIO_STORAGE_KEY = 'salary_ratios_minimal_v5';
+  const RATIO_STORAGE_KEY = 'salary_ratios_independent_100_v1';
   let defaultRatios = { life: 40, save: 30, fund: 20, invest: 10 };
   let ratios = JSON.parse(localStorage.getItem(RATIO_STORAGE_KEY)) || defaultRatios;
 
+  let tempEditRatios = { ...ratios };
   let salaryRecords = JSON.parse(localStorage.getItem('salary_records') || '[]');
   let expenseRecords = JSON.parse(localStorage.getItem('expense_records') || '[]');
   let editingSalaryId = null;
@@ -576,7 +547,6 @@
     localStorage.setItem('expense_records', JSON.stringify(expenseRecords));
   }
 
-  /* 提醒弹窗交互与内部 Tab 切换 */
   function openReminderModal() {
     document.getElementById('reminderModal').classList.add('active');
   }
@@ -603,7 +573,6 @@
     }
   }
 
-  /* 方案：直接调用浏览器原生系统通知 (Web Notifications API) */
   function enableWebNotification() {
     const statusText = document.getElementById('notifStatusText');
     const timeVal = document.getElementById('dailyRemindTime').value || '21:30';
@@ -619,7 +588,6 @@
         statusText.innerText = `✓ 已开启！每天 ${timeVal} 将直接弹出系统通知`;
         statusText.style.color = '#10b981';
         
-        // 立即展示一次成功测试通知
         new Notification('📝 记账提醒已就绪', {
           body: `已设置每天 ${timeVal} 准时提醒你记账！`,
           icon: 'data:image/svg+xml,%3Csvg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="50" cy="50" r="50" fill="%236366f1"/%3E%3C/svg%3E'
@@ -630,26 +598,6 @@
       }
     });
   }
-
-  /* 页面后台运行时定时轮询检查是否到达每日提醒时间 */
-  setInterval(() => {
-    const savedTime = localStorage.getItem('daily_notif_time');
-    if (!savedTime || Notification.permission !== 'granted') return;
-
-    const d = new Date();
-    const curH = String(d.getHours()).padStart(2, '0');
-    const curM = String(d.getMinutes()).padStart(2, '0');
-    const curTime = `${curH}:${curM}`;
-    const todayStr = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-    const lastNotifDate = localStorage.getItem('last_notif_date');
-
-    if (curTime === savedTime && lastNotifDate !== todayStr) {
-      new Notification('📝 每日记账提醒', {
-        body: '今天有新的开支吗？别忘了打开记账工具随手记一笔！',
-      });
-      localStorage.setItem('last_notif_date', todayStr);
-    }
-  }, 30000);
 
   const pad = n => String(n).padStart(2, '0');
   const formatICSDate = d => {
@@ -755,8 +703,9 @@
     downloadICS(`每月发薪提醒-${day}日.ics`, ics);
   }
 
-  /* 比例弹窗交互 */
+  /* 独立比例微调 + 100% 强校验逻辑 */
   function openRatioModal() {
+    tempEditRatios = { ...ratios };
     updateModalDisplay();
     document.getElementById('ratioModal').classList.add('active');
   }
@@ -765,36 +714,66 @@
     document.getElementById('ratioModal').classList.remove('active');
   }
 
-  function stepPlanA(targetKey, delta) {
-    const curVal = ratios[targetKey];
+  function stepSingleEdit(targetKey, delta) {
+    const curVal = tempEditRatios[targetKey] || 0;
     const nextVal = curVal + delta;
     if (nextVal < 0 || nextVal > 100) return;
 
-    const otherKeys = orderKeys.filter(k => k !== targetKey);
-    let nextRatios = { ...ratios };
-    nextRatios[targetKey] = nextVal;
-
-    if (delta > 0) {
-      let canDeduct = otherKeys.every(k => nextRatios[k] >= 1);
-      if (!canDeduct) return;
-      otherKeys.forEach(k => { nextRatios[k] -= 1; });
-    } else {
-      let canAdd = otherKeys.every(k => nextRatios[k] + 1 <= 100);
-      if (!canAdd) return;
-      otherKeys.forEach(k => { nextRatios[k] += 1; });
-    }
-
-    ratios = nextRatios;
-    saveStorage();
+    tempEditRatios[targetKey] = nextVal;
     updateModalDisplay();
-    updateRatioUI();
-    render();
   }
 
   function updateModalDisplay() {
+    let sum = 0;
     orderKeys.forEach(k => {
-      document.getElementById(`mVal-${k}`).innerText = `${ratios[k]}%`;
+      document.getElementById(`mVal-${k}`).innerText = `${tempEditRatios[k]}%`;
+      sum += (tempEditRatios[k] || 0);
     });
+
+    const sumDisplay = document.getElementById('modalSumDisplay');
+    const sumTip = document.getElementById('modalSumTip');
+    const saveBtn = document.getElementById('btnSaveRatio');
+
+    sumDisplay.innerText = `${sum}%`;
+
+    if (sum === 100) {
+      sumDisplay.style.color = '#10b981';
+      sumTip.innerText = '✓ 比例恰好为 100%，可以保存并重算金额';
+      sumTip.style.color = '#10b981';
+      saveBtn.disabled = false;
+      saveBtn.style.opacity = '1';
+      saveBtn.style.pointerEvents = 'auto';
+    } else {
+      sumDisplay.style.color = '#ef4444';
+      if (sum > 100) {
+        sumTip.innerText = `⚠️ 多出 ${sum - 100}%，请调小某些项凑齐 100%`;
+      } else {
+        sumTip.innerText = `⚠️ 还差 ${100 - sum}%，请调大某些项凑齐 100%`;
+      }
+      sumTip.style.color = '#ef4444';
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = '0.4';
+      saveBtn.style.pointerEvents = 'none';
+    }
+  }
+
+  function saveAndApplyRatios() {
+    ratios = { ...tempEditRatios };
+
+    // 重新按 100% 最新比例重算历史每笔工资的分配金额
+    salaryRecords = salaryRecords.map(r => ({
+      ...r,
+      life: r.total * ((ratios.life || 0) / 100),
+      save: r.total * ((ratios.save || 0) / 100),
+      fund: r.total * ((ratios.fund || 0) / 100),
+      invest: r.total * ((ratios.invest || 0) / 100),
+      ratioSnapshot: { ...ratios }
+    }));
+
+    saveStorage();
+    updateRatioUI();
+    closeRatioModal();
+    render();
   }
 
   function updateRatioUI() {
