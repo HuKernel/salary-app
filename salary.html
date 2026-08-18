@@ -236,6 +236,72 @@
     
     .empty-state { padding: 36px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 0.82rem; gap: 4px; }
 
+
+    .record-pagination {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .record-page-btn {
+      width: 38px;
+      height: 34px;
+      border: 1px solid var(--border-dark);
+      background: #ffffff;
+      color: var(--text);
+      border-radius: 10px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.16s ease, background 0.16s ease, opacity 0.16s ease;
+    }
+
+    .record-page-btn:active:not(:disabled) {
+      transform: scale(0.94);
+      background: #f1f5f9;
+    }
+
+    .record-page-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .record-page-info {
+      min-width: 72px;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.76rem;
+      font-weight: 750;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .record-page-info #recordPageCurrent {
+      color: var(--text);
+      font-size: 0.82rem;
+    }
+
+    .record-page-divider {
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+
     .record-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
     .record-item:last-child { border-bottom: none; }
     .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
@@ -1318,19 +1384,28 @@
   <section class="card page-view" id="pageRecords">
     <div class="page-caption">按类型、年份和月份筛选历史收入与支出流水。</div>
     <div class="filter-bar">
-      <select id="listTypeFilter" onchange="render()">
+      <select id="listTypeFilter" onchange="resetRecordPageAndRender()">
         <option value="all">全部类型</option>
         <option value="salary">收入</option>
         <option value="expense">支出</option>
       </select>
-      <select id="yearFilter" onchange="render()">
+      <select id="yearFilter" onchange="resetRecordPageAndRender()">
         <option value="all">全部年</option>
       </select>
-      <select id="monthFilter" onchange="render()">
+      <select id="monthFilter" onchange="resetRecordPageAndRender()">
         <option value="all">全部月</option>
       </select>
     </div>
     <div class="record-container" id="recordList"></div>
+    <div class="record-pagination" id="recordPagination" style="display:none;">
+      <button class="record-page-btn" id="recordPrevBtn" onclick="changeRecordPage(-1)">‹</button>
+      <div class="record-page-info">
+        <span id="recordPageCurrent">1</span>
+        <span class="record-page-divider">/</span>
+        <span id="recordPageTotal">1</span>
+      </div>
+      <button class="record-page-btn" id="recordNextBtn" onclick="changeRecordPage(1)">›</button>
+    </div>
   </section>
 </div>
 
@@ -1483,6 +1558,31 @@
   let expenseRecords = JSON.parse(localStorage.getItem('expense_records') || '[]');
   let editingSalaryId = null;
   let pendingDelete = null;
+
+  let currentRecordPage = 1;
+  const recordsPerPage = 10;
+
+  function resetRecordPageAndRender() {
+    currentRecordPage = 1;
+    render();
+  }
+
+  function changeRecordPage(direction) {
+    const totalEl = document.getElementById('recordPageTotal');
+    const totalPages = Math.max(1, Number(totalEl?.textContent || 1));
+    const nextPage = Math.min(totalPages, Math.max(1, currentRecordPage + direction));
+
+    if (nextPage === currentRecordPage) return;
+
+    currentRecordPage = nextPage;
+    render();
+
+    const recordsPage = document.getElementById('pageRecords');
+    if (recordsPage?.classList.contains('active')) {
+      recordsPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   let breakdownMode = localStorage.getItem('salary_breakdown_mode') || 'expense';
   let breakdownAnimationFrame = null;
 
@@ -3081,6 +3181,11 @@
     });
 
     const listEl = document.getElementById('recordList');
+    const paginationEl = document.getElementById('recordPagination');
+    const pageCurrentEl = document.getElementById('recordPageCurrent');
+    const pageTotalEl = document.getElementById('recordPageTotal');
+    const prevBtn = document.getElementById('recordPrevBtn');
+    const nextBtn = document.getElementById('recordNextBtn');
 
     if (filtered.length === 0) {
       listEl.className = 'record-container is-empty';
@@ -3090,11 +3195,25 @@
           <div>暂无明细流水</div>
         </div>
       `;
+      if (paginationEl) paginationEl.style.display = 'none';
+      currentRecordPage = 1;
       return;
     }
 
+    const totalRecordPages = Math.max(1, Math.ceil(filtered.length / recordsPerPage));
+    currentRecordPage = Math.min(Math.max(1, currentRecordPage), totalRecordPages);
+
+    const pageStart = (currentRecordPage - 1) * recordsPerPage;
+    const pageRecords = filtered.slice(pageStart, pageStart + recordsPerPage);
+
+    if (paginationEl) paginationEl.style.display = totalRecordPages > 1 ? 'flex' : 'none';
+    if (pageCurrentEl) pageCurrentEl.textContent = currentRecordPage;
+    if (pageTotalEl) pageTotalEl.textContent = totalRecordPages;
+    if (prevBtn) prevBtn.disabled = currentRecordPage <= 1;
+    if (nextBtn) nextBtn.disabled = currentRecordPage >= totalRecordPages;
+
     listEl.className = 'record-container has-data';
-    listEl.innerHTML = filtered.map(r => {
+    listEl.innerHTML = pageRecords.map(r => {
       if (r.type === 'salary') {
         const snap = r.ratioSnapshot || ratios;
         return `
@@ -3133,7 +3252,7 @@
 
     if (document.getElementById('pageRecords')?.classList.contains('active')) {
       const items = Array.from(document.querySelectorAll('#recordList .record-item'));
-      items.slice(0, 8).forEach((item, index) => restartAnimation(item, 'record-enter-anim', 70 + index * 50));
+      items.slice(0, recordsPerPage).forEach((item, index) => restartAnimation(item, 'record-enter-anim', 70 + index * 45));
     }
   }
 
