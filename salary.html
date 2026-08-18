@@ -1160,7 +1160,7 @@
           <span class="ratio-tag" id="summaryLabel-life">40%</span>
         </div>
         <div class="val" id="balLife">¥0.00</div>
-        <div class="summary-sub" id="subLife">入¥0.00 | 支¥0.00</div>
+        <div class="summary-sub" id="subLife">入¥0 | 支¥0</div>
       </div>
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
@@ -1168,7 +1168,7 @@
           <span class="ratio-tag" id="summaryLabel-save">30%</span>
         </div>
         <div class="val" id="balSave">¥0.00</div>
-        <div class="summary-sub" id="subSave">入¥0.00 | 支¥0.00</div>
+        <div class="summary-sub" id="subSave">入¥0 | 支¥0</div>
       </div>
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
@@ -1176,7 +1176,7 @@
           <span class="ratio-tag" id="summaryLabel-fund">20%</span>
         </div>
         <div class="val" id="balFund">¥0.00</div>
-        <div class="summary-sub" id="subFund">入¥0.00 | 支¥0.00</div>
+        <div class="summary-sub" id="subFund">入¥0 | 支¥0</div>
       </div>
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
@@ -1184,7 +1184,7 @@
           <span class="ratio-tag" id="summaryLabel-invest">10%</span>
         </div>
         <div class="val" id="balInvest">¥0.00</div>
-        <div class="summary-sub" id="subInvest">入¥0.00 | 支¥0.00</div>
+        <div class="summary-sub" id="subInvest">入¥0 | 支¥0</div>
       </div>
     </div>
 
@@ -2492,7 +2492,7 @@
       const v = abs / 1000;
       return `${sign}¥${v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)}k`;
     }
-    return `${sign}${formatCompactMoney(abs)}`;
+    return `${sign}¥${abs.toFixed(2)}`;
   }
 
 
