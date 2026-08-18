@@ -3168,7 +3168,11 @@
       combined = combined.concat(expenseRecords);
     }
 
-    combined.sort((a, b) => (b.id || 0) - (a.id || 0));
+    combined.sort((a, b) => {
+      const dateA = a.date || (a.month ? `${a.month}-01` : '');
+      const dateB = b.date || (b.month ? `${b.month}-01` : '');
+      return dateB.localeCompare(dateA) || (b.id || 0) - (a.id || 0);
+    });
 
     const filtered = combined.filter(r => {
       if (!r.month) return true;
