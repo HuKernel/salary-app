@@ -550,7 +550,7 @@
       color: var(--text);
       font-variant-numeric: tabular-nums;
       line-height: 1.15;
-      max-width: 70px;
+      max-width: 78px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -1160,7 +1160,7 @@
           <span class="ratio-tag" id="summaryLabel-life">40%</span>
         </div>
         <div class="val" id="balLife">¥0.00</div>
-        <div class="summary-sub" id="subLife">入¥0 | 支¥0</div>
+        <div class="summary-sub" id="subLife">入¥0.00 | 支¥0.00</div>
       </div>
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
@@ -1168,7 +1168,7 @@
           <span class="ratio-tag" id="summaryLabel-save">30%</span>
         </div>
         <div class="val" id="balSave">¥0.00</div>
-        <div class="summary-sub" id="subSave">入¥0 | 支¥0</div>
+        <div class="summary-sub" id="subSave">入¥0.00 | 支¥0.00</div>
       </div>
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
@@ -1176,7 +1176,7 @@
           <span class="ratio-tag" id="summaryLabel-fund">20%</span>
         </div>
         <div class="val" id="balFund">¥0.00</div>
-        <div class="summary-sub" id="subFund">入¥0 | 支¥0</div>
+        <div class="summary-sub" id="subFund">入¥0.00 | 支¥0.00</div>
       </div>
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
@@ -1184,13 +1184,13 @@
           <span class="ratio-tag" id="summaryLabel-invest">10%</span>
         </div>
         <div class="val" id="balInvest">¥0.00</div>
-        <div class="summary-sub" id="subInvest">入¥0 | 支¥0</div>
+        <div class="summary-sub" id="subInvest">入¥0.00 | 支¥0.00</div>
       </div>
     </div>
 
     <div class="trend-section">
       <div class="trend-header">
-        <div class="trend-title">收支折线</div>
+        <div class="trend-title">收支联动趋势</div>
         <div class="trend-legend">
           <span class="legend-item" id="legendNet"><span class="legend-line" style="background:#0f172a"></span>净资产</span>
           <span class="legend-item" id="legendIncome"><span class="legend-line" style="background:#10b981"></span>收入</span>
@@ -1235,7 +1235,7 @@
       <div class="breakdown-section">
         <div class="breakdown-head">
           <div>
-            <div class="breakdown-title">收支分类</div>
+            <div class="breakdown-title">分类构成</div>
             <div class="breakdown-subtitle" id="breakdownSubtitle">跟随当前时间范围统计；支出优先按备注分类，无备注时按账户分类</div>
           </div>
           <div class="breakdown-switcher">
@@ -2353,7 +2353,7 @@
     }
 
     if (centerLabel) centerLabel.textContent = breakdownMode === 'expense' ? '总支出' : '总收入';
-    if (centerValue) centerValue.textContent = `¥${total.toFixed(2)}`;
+    if (centerValue) centerValue.textContent = formatCompactMoney(total);
 
     if (!data.length || total <= 0) {
       canvas.style.display = 'none';
@@ -2405,7 +2405,7 @@
             <span class="breakdown-legend-name">${escapeHTML(item.name)}</span>
           </div>
           <div class="breakdown-legend-value">
-            ¥${item.value.toFixed(2)}
+            ${formatCompactMoney(item.value)}
             <small>${pct.toFixed(1)}%</small>
           </div>
         </div>
@@ -2492,7 +2492,7 @@
       const v = abs / 1000;
       return `${sign}¥${v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)}k`;
     }
-    return `${sign}¥${abs.toFixed(2)}`;
+    return `${sign}${formatCompactMoney(abs)}`;
   }
 
 
@@ -2691,11 +2691,11 @@
     const card = document.getElementById('trendDetailCard');
 
     if (dateEl) dateEl.textContent = `${month}月${Number(day)}日`;
-    if (incomeEl) incomeEl.textContent = `¥${Number(row.income || 0).toFixed(2)}`;
-    if (expenseEl) expenseEl.textContent = `¥${Number(row.expense || 0).toFixed(2)}`;
+    if (incomeEl) incomeEl.textContent = formatCompactMoney(Number(row.income || 0));
+    if (expenseEl) expenseEl.textContent = formatCompactMoney(Number(row.expense || 0));
     if (deltaEl) {
       const delta = Number(row.income || 0) - Number(row.expense || 0);
-      deltaEl.textContent = `${delta >= 0 ? '+' : '-'}¥${Math.abs(delta).toFixed(2)}`;
+      deltaEl.textContent = `${delta >= 0 ? '+' : '-'}${formatCompactMoney(Math.abs(delta))}`;
       deltaEl.style.color = delta < 0 ? 'var(--expense)' : 'var(--text)';
     }
 
@@ -2708,7 +2708,7 @@
           const sign = item.type === 'income' ? '+' : '-';
           return `<div class="trend-detail-item">
             <div class="left">${timeText} · ${escapeHtml(item.label)}</div>
-            <div class="amount ${item.type === 'expense' ? 'out' : ''}">${sign}¥${item.amount.toFixed(2)}</div>
+            <div class="amount ${item.type === 'expense' ? 'out' : ''}">${sign}${formatCompactMoney(item.amount)}</div>
           </div>`;
         }).join('');
       }
@@ -3039,19 +3039,19 @@
     const netInvest = totalIn.invest - totalOut.invest;
     const netTotal = netLife + netSave + netFund + netInvest;
 
-    document.getElementById('balLife').innerText = `¥${netLife.toFixed(2)}`;
-    document.getElementById('subLife').innerText = `入¥${totalIn.life.toFixed(0)} | 支¥${totalOut.life.toFixed(0)}`;
+    document.getElementById('balLife').innerText = formatCompactMoney(netLife);
+    document.getElementById('subLife').innerText = `入${formatCompactMoney(totalIn.life)} | 支${formatCompactMoney(totalOut.life)}`;
 
-    document.getElementById('balSave').innerText = `¥${netSave.toFixed(2)}`;
-    document.getElementById('subSave').innerText = `入¥${totalIn.save.toFixed(0)} | 支¥${totalOut.save.toFixed(0)}`;
+    document.getElementById('balSave').innerText = formatCompactMoney(netSave);
+    document.getElementById('subSave').innerText = `入${formatCompactMoney(totalIn.save)} | 支${formatCompactMoney(totalOut.save)}`;
 
-    document.getElementById('balFund').innerText = `¥${netFund.toFixed(2)}`;
-    document.getElementById('subFund').innerText = `入¥${totalIn.fund.toFixed(0)} | 支¥${totalOut.fund.toFixed(0)}`;
+    document.getElementById('balFund').innerText = formatCompactMoney(netFund);
+    document.getElementById('subFund').innerText = `入${formatCompactMoney(totalIn.fund)} | 支${formatCompactMoney(totalOut.fund)}`;
 
-    document.getElementById('balInvest').innerText = `¥${netInvest.toFixed(2)}`;
-    document.getElementById('subInvest').innerText = `入¥${totalIn.invest.toFixed(0)} | 支¥${totalOut.invest.toFixed(0)}`;
+    document.getElementById('balInvest').innerText = formatCompactMoney(netInvest);
+    document.getElementById('subInvest').innerText = `入${formatCompactMoney(totalIn.invest)} | 支${formatCompactMoney(totalOut.invest)}`;
 
-    document.getElementById('balanceSummaryTotal').innerText = `¥${netTotal.toFixed(2)}`;
+    document.getElementById('balanceSummaryTotal').innerText = formatCompactMoney(netTotal);
     animateValueElements();
     renderTrendChart();
     renderBreakdownChart();
@@ -3101,13 +3101,13 @@
           <div class="record-item">
             <div class="record-header">
               <span class="record-date">${r.date || `${r.month}-01`} ${r.incomeName || '工资'}入账</span>
-              <span class="record-amount in">+¥${Number(r.total).toFixed(2)}</span>
+              <span class="record-amount in">+${formatCompactMoney(Number(r.total))}</span>
             </div>
             <div class="record-tags">
-              <span>生活(${snap.life}%): ¥${Number(r.life).toFixed(2)}</span>
-              <span>存储(${snap.save}%): ¥${Number(r.save).toFixed(2)}</span>
-              <span>备用(${snap.fund}%): ¥${Number(r.fund).toFixed(2)}</span>
-              <span>理财(${snap.invest}%): ¥${Number(r.invest).toFixed(2)}</span>
+              <span>生活(${snap.life}%): ${formatCompactMoney(Number(r.life))}</span>
+              <span>存储(${snap.save}%): ${formatCompactMoney(Number(r.save))}</span>
+              <span>备用(${snap.fund}%): ${formatCompactMoney(Number(r.fund))}</span>
+              <span>理财(${snap.invest}%): ${formatCompactMoney(Number(r.invest))}</span>
             </div>
             <div class="record-actions">
               <button class="btn-action-edit" onclick="editSalary(${r.id})">编辑</button>
@@ -3120,11 +3120,11 @@
           <div class="record-item">
             <div class="record-header">
               <span class="record-date">${r.date} ${accountNames[r.account] || r.account}</span>
-              <span class="record-amount out">-¥${Number(r.amount).toFixed(2)}</span>
+              <span class="record-amount out">-${formatCompactMoney(Number(r.amount))}</span>
             </div>
             <div class="record-note">${r.note}</div>
             <div class="record-actions">
-              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'expense', '${r.date} 支出 ¥${Number(r.amount).toFixed(2)}')">删除</button>
+              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'expense', '${r.date} 支出 ${formatCompactMoney(Number(r.amount))}')">删除</button>
             </div>
           </div>
         `;
