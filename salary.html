@@ -1230,7 +1230,7 @@
       </div>
       <div class="trend-meta">
         <span id="trendRangeText"><strong>当前范围：</strong>--</span>
-        <span id="trendHintText"><strong>说明：</strong>净资产线会联动显示当前所选范围内的累计变化。</span>
+        <span id="trendHintText"><strong>累计汇总：</strong>收入 ¥0.00 ｜ 支出 ¥0.00 ｜ 余额 ¥0.00</span>
       </div>
       <div class="breakdown-section">
         <div class="breakdown-head">
@@ -1256,7 +1256,7 @@
           <div class="breakdown-legend" id="breakdownLegend"></div>
         </div>
       </div>
-      <div class="trend-footnote">维度查看：年视图的 x 轴是月份，月视图的 x 轴是日期，日视图的 x 轴是时间。</div>
+      <div class="trend-footnote">已优化为多时间维度查看：年视图的 x 轴是月份，月视图的 x 轴是日期，日视图的 x 轴是时间。</div>
     </div>
   </section>
 
@@ -2483,8 +2483,12 @@
     if (!events.length) {
       const rangeText = document.getElementById('trendRangeText');
       const hintText = document.getElementById('trendHintText');
+      const totalIncomeAll = salaryRecords.reduce((sum, item) => sum + Number(item.total || 0), 0);
+      const totalExpenseAll = expenseRecords.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      const totalBalanceAll = totalIncomeAll - totalExpenseAll;
+
       if (rangeText) rangeText.innerHTML = '<strong>当前范围：</strong>暂无数据';
-      if (hintText) hintText.innerHTML = '<strong>说明：</strong>新增一笔收入或支出后，这里会自动生成趋势线。';
+      if (hintText) hintText.innerHTML = `<strong>累计汇总：</strong>收入 ¥${totalIncomeAll.toFixed(2)} ｜ 支出 ¥${totalExpenseAll.toFixed(2)} ｜ 余额 ¥${totalBalanceAll.toFixed(2)}`;
       return [];
     }
 
@@ -2574,11 +2578,12 @@
 
     const rangeText = document.getElementById('trendRangeText');
     const hintText = document.getElementById('trendHintText');
-    const periodIncome = buckets.reduce((sum, item) => sum + item.income, 0);
-    const periodExpense = buckets.reduce((sum, item) => sum + item.expense, 0);
+    const totalIncomeAll = salaryRecords.reduce((sum, item) => sum + Number(item.total || 0), 0);
+    const totalExpenseAll = expenseRecords.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const totalBalanceAll = totalIncomeAll - totalExpenseAll;
+
     if (rangeText) rangeText.innerHTML = `<strong>当前范围：</strong>${rangeLabel}`;
-    const periodBalance = periodIncome - periodExpense;
-    if (hintText) hintText.innerHTML = `<strong>区间汇总：</strong>收入 ¥${periodIncome.toFixed(2)} ｜ 支出 ¥${periodExpense.toFixed(2)} ｜ 余额 ¥${periodBalance.toFixed(2)}`;
+    if (hintText) hintText.innerHTML = `<strong>累计汇总：</strong>收入 ¥${totalIncomeAll.toFixed(2)} ｜ 支出 ¥${totalExpenseAll.toFixed(2)} ｜ 余额 ¥${totalBalanceAll.toFixed(2)}`;
 
     return buckets;
   }
