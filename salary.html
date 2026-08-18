@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f8fafc">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1024' height='1024' rx='240' fill='%230f172a'/%3E%3Cpath d='M708 460a36 36 0 0 0 36-36 36 36 0 0 0-36-36H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v72H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v142.91A33.08 33.08 0 0 0 509.09 780h5.82A33.08 33.08 0 0 0 548 746.91V604h160a36 36 0 0 0 36-36 36 36 0 0 0-36-36H548v-72z' fill='%23ffffff'/%3E%3Cpath d='M511.8 388a35.33 35.33 0 0 0 25.28-10.4l72.56-72.8a35.83 35.83 0 0 0 0-50.4 35.52 35.52 0 0 0-50.23 0l-47.13 47.29-47-47.18a35.93 35.93 0 0 0-50.78 0 36.22 36.22 0 0 0 0 51l71.76 72A35.76 35.76 0 0 0 511.8 388z' fill='%23ffffff'/%3E%3C/svg%3E">
-  <title>工资分配与记账</title>
+  <title>资产分配与记账</title>
   <style>
     :root {
       --bg: #f8fafc;
@@ -268,6 +268,432 @@
     }
     .step-btn:active { background: #f1f5f9; }
     .step-val { width: 44px; text-align: center; font-weight: 700; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+
+
+    .trend-section {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .trend-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .trend-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .trend-subtitle {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+
+    .trend-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.73rem;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .legend-line {
+      width: 16px;
+      height: 3px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .chart-shell {
+      position: relative;
+      margin-top: 10px;
+      background: #fcfcfd;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      min-height: 240px;
+    }
+
+    .trend-chart {
+      width: 100%;
+      height: 220px;
+      display: block;
+    }
+
+    .chart-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    .trend-footnote {
+      margin-top: 10px;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+    }
+
+
+    /* ===== 页面切换沉浸式动效（收纳盒展开感） ===== */
+    .summary-grid {
+      perspective: 1200px;
+    }
+
+    .page-caption,
+    .dashboard-header,
+    .trend-section,
+    .tab-nav,
+    #salaryForm,
+    #expenseForm,
+    .filter-bar,
+    #recordList {
+      will-change: transform, opacity;
+    }
+
+    .animate-dashboard-head {
+      animation: fadeSlideDown 0.36s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    .box-open-anim {
+      animation: storageBoxOpen 0.62s cubic-bezier(0.18, 0.9, 0.22, 1) both;
+      transform-origin: center top;
+      backface-visibility: hidden;
+    }
+
+    .chart-rise-anim {
+      animation: chartRiseIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    .caption-fade-anim {
+      animation: softCaptionIn 0.34s ease both;
+    }
+
+    .panel-reveal-anim {
+      animation: panelReveal 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    .record-enter-anim {
+      animation: recordCascade 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    .page-view.page-switch-in {
+      animation: pageSoftScaleIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    @keyframes storageBoxOpen {
+      0% {
+        opacity: 0;
+        transform: perspective(900px) translateY(22px) scale(0.9) rotateX(-18deg);
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+      }
+      45% {
+        opacity: 1;
+        transform: perspective(900px) translateY(-4px) scale(1.03) rotateX(6deg);
+        box-shadow: 0 18px 32px rgba(15, 23, 42, 0.1);
+      }
+      72% {
+        transform: perspective(900px) translateY(1px) scale(0.995) rotateX(-2deg);
+      }
+      100% {
+        opacity: 1;
+        transform: perspective(900px) translateY(0) scale(1) rotateX(0deg);
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+      }
+    }
+
+    @keyframes chartRiseIn {
+      0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes softCaptionIn {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes panelReveal {
+      0% { opacity: 0; transform: translateY(16px) scale(0.985); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes recordCascade {
+      0% { opacity: 0; transform: translateY(12px) scale(0.985); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes fadeSlideDown {
+      0% { opacity: 0; transform: translateY(-8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pageSoftScaleIn {
+      0% { opacity: 0; transform: translateY(8px) scale(0.992); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+
+    /* ===== 轻交互动画增强 ===== */
+    .card {
+      transition: transform 0.22s ease, box-shadow 0.22s ease, opacity 0.2s ease;
+    }
+
+    .summary-item {
+      transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+    .summary-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+      border-color: rgba(148, 163, 184, 0.35);
+    }
+    .summary-item:active {
+      transform: scale(0.98);
+    }
+
+    .btn-main,
+    .btn-header-action,
+    .tab-btn,
+    .mobile-nav-btn,
+    .btn-action-edit,
+    .btn-action-del,
+    .step-btn,
+    .filter-bar select {
+      transition: transform 0.16s ease, box-shadow 0.2s ease, background-color 0.2s ease, opacity 0.16s ease;
+    }
+
+    .btn-main:hover,
+    .btn-header-action:hover,
+    .btn-action-edit:hover,
+    .btn-action-del:hover,
+    .step-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+    }
+
+    .mobile-nav-btn .nav-icon,
+    .mobile-nav-btn span:last-child {
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .mobile-nav-btn.active .nav-icon {
+      transform: translateY(-1px) scale(1.08);
+    }
+
+    .record-item {
+      animation: recordFadeUp 0.32s ease both;
+      transform-origin: center bottom;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      border-radius: 10px;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+
+    .record-item:hover {
+      background: rgba(248, 250, 252, 0.8);
+      transform: translateY(-1px);
+    }
+
+    .record-item:nth-child(1) { animation-delay: 0.02s; }
+    .record-item:nth-child(2) { animation-delay: 0.05s; }
+    .record-item:nth-child(3) { animation-delay: 0.08s; }
+    .record-item:nth-child(4) { animation-delay: 0.11s; }
+    .record-item:nth-child(5) { animation-delay: 0.14s; }
+    .record-item:nth-child(6) { animation-delay: 0.17s; }
+
+    @keyframes recordFadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-view {
+      animation: pageSlideFade 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes pageSlideFade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .value-pop {
+      animation: valuePop 0.36s ease;
+    }
+
+    @keyframes valuePop {
+      0% { transform: scale(0.98); opacity: 0.8; }
+      45% { transform: scale(1.045); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .pulse-highlight {
+      animation: pulseHighlight 0.48s ease;
+    }
+
+    @keyframes pulseHighlight {
+      0% { box-shadow: 0 0 0 rgba(15,23,42,0); }
+      50% { box-shadow: 0 0 0 6px rgba(15,23,42,0.06); }
+      100% { box-shadow: 0 0 0 rgba(15,23,42,0); }
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom, 20px) + 84px);
+      transform: translateX(-50%) translateY(18px);
+      background: rgba(15, 23, 42, 0.94);
+      color: #fff;
+      padding: 11px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.24);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      max-width: calc(100vw - 28px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .chart-shell {
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .chart-shell:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+
+    /* ===== 三页式移动端布局 ===== */
+    body {
+      padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 92px);
+    }
+
+    .page-view {
+      display: none;
+      animation: pageFadeIn 0.18s ease;
+    }
+    .page-view.active { display: block; }
+
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mobile-bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: calc(100% - 20px);
+      max-width: 420px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      padding: 6px;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(226,232,240,0.9);
+      border-radius: 18px;
+      box-shadow: 0 12px 34px rgba(15,23,42,0.14);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      z-index: 9000;
+    }
+
+    .mobile-nav-btn {
+      border: 0;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 13px;
+      padding: 9px 4px 8px;
+      min-height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .mobile-nav-btn .nav-icon {
+      font-size: 1.08rem;
+      line-height: 1;
+    }
+
+    .mobile-nav-btn.active {
+      background: var(--text);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(15,23,42,0.16);
+    }
+
+    .page-caption {
+      margin: -8px 4px 12px;
+      color: var(--text-dim);
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    #pageRecords.card {
+      min-height: calc(100vh - 190px);
+    }
+
+    #pageRecords .record-container {
+      max-height: none;
+    }
+
+    @media (max-width: 380px) {
+      body { padding-left: 10px; padding-right: 10px; }
+      .card { padding: 16px 13px; border-radius: 17px; }
+      .summary-grid { gap: 6px; }
+      .summary-item { padding: 11px 10px 12px; }
+      .summary-item .val { font-size: 1rem; }
+      .mobile-bottom-nav { width: calc(100% - 14px); }
+    }
+
+    @media (min-width: 700px) {
+      .container { max-width: 520px; }
+      .mobile-bottom-nav { max-width: 500px; }
+    }
+
   </style>
 </head>
 <body>
@@ -282,7 +708,7 @@
   </header>
 
   <!-- 净资产汇总 -->
-  <section class="card">
+  <section class="card page-view active" id="pageOverview">
     <div class="dashboard-header">
       <span class="dashboard-label">净资产总池</span>
       <span class="dashboard-total" id="balanceSummaryTotal">¥0.00</span>
@@ -321,19 +747,41 @@
         <div class="summary-sub" id="subInvest">入¥0 | 支¥0</div>
       </div>
     </div>
+
+    <div class="trend-section">
+      <div class="trend-header">
+        <div class="trend-title">收支联动趋势</div>
+        <div class="trend-legend">
+          <span class="legend-item"><span class="legend-line" style="background:#0f172a"></span>净资产</span>
+          <span class="legend-item"><span class="legend-line" style="background:#10b981"></span>收入</span>
+          <span class="legend-item"><span class="legend-line" style="background:#e11d48"></span>支出</span>
+        </div>
+      </div>
+      <div class="trend-subtitle">按月份自动汇总收入与支出，并联动展示期末净资产变化。新增、编辑、删除记录后会自动刷新。</div>
+      <div class="chart-shell">
+        <canvas id="trendChart" class="trend-chart"></canvas>
+        <div class="chart-empty" id="trendChartEmpty" style="display:none;">暂无趋势数据<br>先新增一笔收入或支出后，这里会自动生成折线图。</div>
+      </div>
+      <div class="trend-footnote">建议：这个图放在“资产分配”页是合适的，因为它能把静态余额和动态收支变化放在一起看，移动端体验会更完整。</div>
+    </div>
   </section>
 
   <!-- 录入模块 -->
-  <section class="card">
+  <section class="card page-view" id="pageEntry">
+    <div class="page-caption">任意收入都可以自定义名称并按当前比例分配，日常消费从对应账户直接扣减。</div>
     <div class="tab-nav">
-      <button class="tab-btn active" id="tabSalaryBtn" onclick="switchForm('salary')">工资入账</button>
+      <button class="tab-btn active" id="tabSalaryBtn" onclick="switchForm('salary')">收入入账</button>
       <button class="tab-btn" id="tabExpenseBtn" onclick="switchForm('expense')">支出扣减</button>
     </div>
 
     <div id="salaryForm">
       <div class="input-group">
         <div class="input-field">
-          <label>发薪月份</label>
+          <label>收入名称 / 来源</label>
+          <input type="text" id="incomeName" placeholder="如：工资、奖金、兼职、报销">
+        </div>
+        <div class="input-field">
+          <label>入账月份</label>
           <input type="month" id="salaryMonth">
         </div>
         <div class="input-field">
@@ -373,11 +821,12 @@
   </section>
 
   <!-- 列表 -->
-  <section class="card">
+  <section class="card page-view" id="pageRecords">
+    <div class="page-caption">按类型、年份和月份筛选历史收入与支出流水。</div>
     <div class="filter-bar">
       <select id="listTypeFilter" onchange="render()">
         <option value="all">全部类型</option>
-        <option value="salary">工资</option>
+        <option value="salary">收入</option>
         <option value="expense">支出</option>
       </select>
       <select id="yearFilter" onchange="render()">
@@ -390,6 +839,20 @@
     <div class="record-container" id="recordList"></div>
   </section>
 </div>
+
+<div class="toast" id="appToast"></div>
+
+<nav class="mobile-bottom-nav" aria-label="主页面导航">
+  <button class="mobile-nav-btn active" id="navOverview" onclick="switchPage('overview')">
+    <span class="nav-icon">◫</span><span>资产总览</span>
+  </button>
+  <button class="mobile-nav-btn" id="navEntry" onclick="switchPage('entry')">
+    <span class="nav-icon">＋</span><span>记账录入</span>
+  </button>
+  <button class="mobile-nav-btn" id="navRecords" onclick="switchPage('records')">
+    <span class="nav-icon">≡</span><span>流水记录</span>
+  </button>
+</nav>
 
 <!-- 弹窗 1：提醒设置 -->
 <div class="modal-overlay" id="reminderModal">
@@ -760,7 +1223,7 @@
   function saveAndApplyRatios() {
     ratios = { ...tempEditRatios };
 
-    // 重新按 100% 最新比例重算历史每笔工资的分配金额
+    // 重新按 100% 最新比例重算历史每笔收入的分配金额
     salaryRecords = salaryRecords.map(r => ({
       ...r,
       life: r.total * ((ratios.life || 0) / 100),
@@ -774,6 +1237,7 @@
     updateRatioUI();
     closeRatioModal();
     render();
+    showToast('配比已保存并重新计算');
   }
 
   function updateRatioUI() {
@@ -782,6 +1246,37 @@
       document.getElementById(`summaryLabel-${k}`).innerText = `${val}%`;
       document.getElementById(`opt-${k}`).innerText = `${accountNames[k]} (${val}%)`;
     });
+  }
+
+
+  function switchPage(page) {
+    const pages = {
+      overview: document.getElementById('pageOverview'),
+      entry: document.getElementById('pageEntry'),
+      records: document.getElementById('pageRecords')
+    };
+    const navs = {
+      overview: document.getElementById('navOverview'),
+      entry: document.getElementById('navEntry'),
+      records: document.getElementById('navRecords')
+    };
+
+    Object.values(pages).forEach(el => el && el.classList.remove('active'));
+    Object.values(navs).forEach(el => el && el.classList.remove('active'));
+
+    if (pages[page]) pages[page].classList.add('active');
+    if (navs[page]) navs[page].classList.add('active');
+
+    const pageTitles = { overview: '资产分配', entry: '记账录入', records: '流水记录' };
+    const titleEl = document.querySelector('.app-title');
+    if (titleEl) titleEl.innerText = pageTitles[page] || '资产分配';
+
+    try { localStorage.setItem('salary_app_active_page', page); } catch (e) {}
+    if (page === 'overview') {
+      setTimeout(renderTrendChart, 30);
+    }
+    setTimeout(() => triggerPageVisuals(page), 20);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function switchForm(type) {
@@ -795,11 +1290,13 @@
       eBtn.className = 'tab-btn';
       sForm.style.display = 'block';
       eForm.style.display = 'none';
+      setTimeout(() => restartAnimation(sForm, 'panel-reveal-anim', 0), 10);
     } else {
       sBtn.className = 'tab-btn';
       eBtn.className = 'tab-btn active';
       sForm.style.display = 'none';
       eForm.style.display = 'block';
+      setTimeout(() => restartAnimation(eForm, 'panel-reveal-anim', 0), 10);
     }
   }
 
@@ -810,11 +1307,13 @@
   }
 
   function addOrUpdateSalary() {
+    const incomeName = document.getElementById('incomeName').value.trim() || '收入';
     const month = document.getElementById('salaryMonth').value;
     const amount = parseFloat(document.getElementById('salaryAmount').value);
+    const isEditing = !!editingSalaryId;
 
     if (!month || isNaN(amount) || amount <= 0) {
-      alert('请输入正确的发薪月份与金额');
+      alert('请输入正确的入账月份与金额');
       return;
     }
 
@@ -829,7 +1328,7 @@
     if (editingSalaryId) {
       const idx = salaryRecords.findIndex(r => r.id === editingSalaryId);
       if (idx !== -1) {
-        salaryRecords[idx] = { ...salaryRecords[idx], month, total: amount, ...alloc };
+        salaryRecords[idx] = { ...salaryRecords[idx], incomeName, month, total: amount, ...alloc };
       }
       editingSalaryId = null;
     } else {
@@ -838,15 +1337,18 @@
         type: 'salary',
         date: `${month}-01`,
         month: month,
+        incomeName: incomeName,
         total: amount,
         ...alloc
       });
     }
 
     saveStorage();
+    document.getElementById('incomeName').value = '';
     document.getElementById('salaryAmount').value = '';
     resetFiltersToAll();
     render();
+    showToast(isEditing ? '收入记录已更新' : '收入已成功入账');
   }
 
   function addExpense() {
@@ -878,6 +1380,7 @@
     document.getElementById('expenseNote').value = '';
     resetFiltersToAll();
     render();
+    showToast('支出记录已添加');
   }
 
   function triggerDelete(id, type, desc) {
@@ -902,12 +1405,15 @@
     saveStorage();
     closeDeleteModal();
     render();
+    showToast(type === 'salary' ? '收入记录已删除' : '支出记录已删除');
   });
 
   function editSalary(id) {
     const r = salaryRecords.find(item => item.id === id);
     if (!r) return;
+    switchPage('entry');
     switchForm('salary');
+    document.getElementById('incomeName').value = r.incomeName || '工资';
     document.getElementById('salaryMonth').value = r.month;
     document.getElementById('salaryAmount').value = r.total;
     editingSalaryId = id;
@@ -945,6 +1451,261 @@
     } else {
       monthSelect.value = 'all';
     }
+  }
+
+
+  function restartAnimation(el, className, delay = 0) {
+    if (!el) return;
+    el.classList.remove(className);
+    el.style.animationDelay = delay ? `${delay}ms` : '0ms';
+    void el.offsetWidth;
+    el.classList.add(className);
+  }
+
+  function clearAnimationClassList(elements, className) {
+    elements.forEach(el => {
+      if (!el) return;
+      el.classList.remove(className);
+      el.style.animationDelay = '0ms';
+    });
+  }
+
+  function triggerPageVisuals(page) {
+    const activePage = document.getElementById(
+      page === 'overview' ? 'pageOverview' : page === 'entry' ? 'pageEntry' : 'pageRecords'
+    );
+    if (!activePage) return;
+
+    activePage.classList.remove('page-switch-in');
+    void activePage.offsetWidth;
+    activePage.classList.add('page-switch-in');
+
+    if (page === 'overview') {
+      restartAnimation(activePage.querySelector('.dashboard-header'), 'animate-dashboard-head', 10);
+      const cards = Array.from(activePage.querySelectorAll('.summary-item'));
+      clearAnimationClassList(cards, 'box-open-anim');
+      cards.forEach((card, index) => restartAnimation(card, 'box-open-anim', 70 + index * 80));
+      restartAnimation(activePage.querySelector('.trend-section'), 'chart-rise-anim', 360);
+      return;
+    }
+
+    if (page === 'entry') {
+      restartAnimation(activePage.querySelector('.page-caption'), 'caption-fade-anim', 10);
+      restartAnimation(activePage.querySelector('.tab-nav'), 'panel-reveal-anim', 60);
+      restartAnimation(document.getElementById('salaryForm'), 'panel-reveal-anim', 120);
+      restartAnimation(document.getElementById('expenseForm'), 'panel-reveal-anim', 120);
+      return;
+    }
+
+    if (page === 'records') {
+      restartAnimation(activePage.querySelector('.page-caption'), 'caption-fade-anim', 10);
+      restartAnimation(activePage.querySelector('.filter-bar'), 'panel-reveal-anim', 70);
+      const items = Array.from(document.querySelectorAll('#recordList .record-item'));
+      clearAnimationClassList(items, 'record-enter-anim');
+      items.slice(0, 8).forEach((item, index) => restartAnimation(item, 'record-enter-anim', 120 + index * 55));
+    }
+  }
+
+
+  let toastTimer = null;
+  let chartAnimationFrame = null;
+
+  function showToast(message) {
+    const toast = document.getElementById('appToast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 1600);
+  }
+
+  function animateValueElements() {
+    const ids = ['balanceSummaryTotal', 'balLife', 'balSave', 'balFund', 'balInvest'];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('value-pop');
+      void el.offsetWidth;
+      el.classList.add('value-pop');
+      setTimeout(() => el.classList.remove('value-pop'), 400);
+    });
+
+    const overviewCard = document.getElementById('pageOverview');
+    if (overviewCard) {
+      overviewCard.classList.remove('pulse-highlight');
+      void overviewCard.offsetWidth;
+      overviewCard.classList.add('pulse-highlight');
+      setTimeout(() => overviewCard.classList.remove('pulse-highlight'), 520);
+    }
+  }
+
+
+  function getTrendSeries() {
+    const monthlyMap = new Map();
+
+    salaryRecords.forEach(item => {
+      const month = item.month;
+      if (!month) return;
+      if (!monthlyMap.has(month)) {
+        monthlyMap.set(month, { month, income: 0, expense: 0 });
+      }
+      monthlyMap.get(month).income += Number(item.total || 0);
+    });
+
+    expenseRecords.forEach(item => {
+      const month = item.month;
+      if (!month) return;
+      if (!monthlyMap.has(month)) {
+        monthlyMap.set(month, { month, income: 0, expense: 0 });
+      }
+      monthlyMap.get(month).expense += Number(item.amount || 0);
+    });
+
+    const sortedMonths = Array.from(monthlyMap.keys()).sort();
+    let runningNet = 0;
+    const fullSeries = sortedMonths.map(month => {
+      const row = monthlyMap.get(month);
+      runningNet += row.income - row.expense;
+      return {
+        month,
+        income: Number(row.income || 0),
+        expense: Number(row.expense || 0),
+        net: Number(runningNet || 0)
+      };
+    });
+
+    return fullSeries.slice(-8);
+  }
+
+  function drawLine(ctx, points, color, progress = 1) {
+    if (!points.length) return;
+    const visibleCount = Math.max(1, Math.ceil(points.length * progress));
+    const visiblePoints = points.slice(0, visibleCount);
+
+    ctx.beginPath();
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = color;
+    visiblePoints.forEach((point, index) => {
+      if (index === 0) ctx.moveTo(point.x, point.y);
+      else ctx.lineTo(point.x, point.y);
+    });
+    ctx.stroke();
+
+    visiblePoints.forEach(point => {
+      ctx.beginPath();
+      ctx.fillStyle = '#ffffff';
+      ctx.arc(point.x, point.y, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = color;
+      ctx.arc(point.x, point.y, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function renderTrendChart() {
+    const canvas = document.getElementById('trendChart');
+    const emptyEl = document.getElementById('trendChartEmpty');
+    if (!canvas || !emptyEl) return;
+
+    const data = getTrendSeries();
+    if (!data.length) {
+      canvas.style.display = 'none';
+      emptyEl.style.display = 'flex';
+      return;
+    }
+
+    const parentWidth = canvas.parentElement ? canvas.parentElement.clientWidth - 20 : canvas.clientWidth;
+    const cssWidth = Math.max(parentWidth || 0, 240);
+    const cssHeight = 220;
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.style.display = 'block';
+    emptyEl.style.display = 'none';
+    canvas.width = Math.floor(cssWidth * dpr);
+    canvas.height = Math.floor(cssHeight * dpr);
+    canvas.style.width = cssWidth + 'px';
+    canvas.style.height = cssHeight + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    const padding = { top: 18, right: 14, bottom: 34, left: 14 };
+    const chartWidth = cssWidth - padding.left - padding.right;
+    const chartHeight = cssHeight - padding.top - padding.bottom;
+
+    const allValues = data.flatMap(item => [item.net, item.income, item.expense]);
+    let minVal = Math.min(...allValues, 0);
+    let maxVal = Math.max(...allValues, 0);
+
+    if (minVal === maxVal) {
+      maxVal = minVal + 1;
+    }
+
+    const range = maxVal - minVal;
+    minVal = minVal - range * 0.12;
+    maxVal = maxVal + range * 0.12;
+
+    const xStep = data.length > 1 ? chartWidth / (data.length - 1) : 0;
+    const getX = idx => padding.left + idx * xStep;
+    const getY = value => {
+      const ratio = (value - minVal) / (maxVal - minVal);
+      return padding.top + chartHeight - ratio * chartHeight;
+    };
+
+    const yTicks = 4;
+
+    const netPoints = data.map((item, idx) => ({ x: getX(idx), y: getY(item.net) }));
+    const incomePoints = data.map((item, idx) => ({ x: getX(idx), y: getY(item.income) }));
+    const expensePoints = data.map((item, idx) => ({ x: getX(idx), y: getY(item.expense) }));
+
+    const drawStaticBase = () => {
+      ctx.clearRect(0, 0, cssWidth, cssHeight);
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif';
+
+      for (let i = 0; i <= yTicks; i++) {
+        const y = padding.top + (chartHeight / yTicks) * i;
+        const value = maxVal - ((maxVal - minVal) / yTicks) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(cssWidth - padding.right, y);
+        ctx.stroke();
+        ctx.fillText('¥' + Math.round(value), padding.left, Math.max(10, y - 4));
+      }
+
+      ctx.fillStyle = '#64748b';
+      data.forEach((item, idx) => {
+        const x = getX(idx);
+        const label = item.month.slice(5).replace(/^0/, '') + '月';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, x, cssHeight - 10);
+      });
+    };
+
+    if (chartAnimationFrame) cancelAnimationFrame(chartAnimationFrame);
+    const start = performance.now();
+    const duration = 480;
+
+    const animate = now => {
+      const progress = Math.min(1, (now - start) / duration);
+      drawStaticBase();
+      drawLine(ctx, netPoints, '#0f172a', progress);
+      drawLine(ctx, incomePoints, '#10b981', progress);
+      drawLine(ctx, expensePoints, '#e11d48', progress);
+      if (progress < 1) {
+        chartAnimationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    drawStaticBase();
+    chartAnimationFrame = requestAnimationFrame(animate);
   }
 
   function render() {
@@ -985,6 +1746,8 @@
     document.getElementById('subInvest').innerText = `入¥${totalIn.invest.toFixed(0)} | 支¥${totalOut.invest.toFixed(0)}`;
 
     document.getElementById('balanceSummaryTotal').innerText = `¥${netTotal.toFixed(2)}`;
+    animateValueElements();
+    renderTrendChart();
 
     const yearFilter = document.getElementById('yearFilter').value;
     const monthFilter = document.getElementById('monthFilter').value;
@@ -1030,7 +1793,7 @@
         return `
           <div class="record-item">
             <div class="record-header">
-              <span class="record-date">${r.month} 工资入账</span>
+              <span class="record-date">${r.month} ${r.incomeName || '工资'}入账</span>
               <span class="record-amount in">+¥${Number(r.total).toFixed(2)}</span>
             </div>
             <div class="record-tags">
@@ -1041,7 +1804,7 @@
             </div>
             <div class="record-actions">
               <button class="btn-action-edit" onclick="editSalary(${r.id})">编辑</button>
-              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'salary', '${r.month} 工资分配')">删除</button>
+              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'salary', '${r.month} ${r.incomeName || '工资'}入账')">删除</button>
             </div>
           </div>
         `;
@@ -1060,10 +1823,26 @@
         `;
       }
     }).join('');
+
+    if (document.getElementById('pageRecords')?.classList.contains('active')) {
+      const items = Array.from(document.querySelectorAll('#recordList .record-item'));
+      items.slice(0, 8).forEach((item, index) => restartAnimation(item, 'record-enter-anim', 70 + index * 50));
+    }
   }
 
+  const savedPage = localStorage.getItem('salary_app_active_page');
+  if (['overview', 'entry', 'records'].includes(savedPage)) {
+    switchPage(savedPage);
+  } else {
+    switchPage('overview');
+  }
   updateRatioUI();
   render();
+  setTimeout(() => {
+    const initialPage = localStorage.getItem('salary_app_active_page') || 'overview';
+    triggerPageVisuals(initialPage);
+  }, 80);
+  window.addEventListener('resize', renderTrendChart);
 </script>
 </body>
 </html>
