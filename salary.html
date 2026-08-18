@@ -1258,8 +1258,9 @@
     <!-- 本月小结 -->
     <div style="margin-top: 12px; padding: 12px; border-radius: 12px; background: #fafafa; border: 1px solid var(--border);">
       <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
-        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">本月小结</span>
-        <span style="font-size: 0.7rem; color: var(--text-dim); font-variant-numeric: tabular-nums;" id="monthSummaryTitle">--</span>
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">月度小结</span>
+        <input type="month" id="monthSummaryPicker" onchange="renderMonthSummary()"
+          style="border: none; background: transparent; font-size: 0.78rem; font-weight: 600; color: var(--text); outline: none; text-align: right; padding: 0;">
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; text-align: center;">
         <div>
@@ -1395,7 +1396,7 @@
         </div>
         <div class="input-field">
           <label>支出分类</label>
-          <select id="expenseCategory">
+          <select id="expenseCategory" onchange="handleCategoryChange()">
             <option value="">不分类</option>
             <option value="餐饮">餐饮</option>
             <option value="交通">交通</option>
@@ -1405,6 +1406,7 @@
             <option value="医疗">医疗</option>
             <option value="教育">教育</option>
             <option value="其他">其他</option>
+            <option value="__custom__">＋ 自定义分类…</option>
           </select>
         </div>
         <div class="input-field">
@@ -1430,6 +1432,9 @@
       </select>
       <select id="monthFilter" onchange="resetRecordPageAndRender()">
         <option value="all">全部月</option>
+      </select>
+      <select id="categoryFilter" onchange="resetRecordPageAndRender()">
+        <option value="all">全部分类</option>
       </select>
     </div>
     <div class="record-container" id="recordList"></div>
@@ -1601,6 +1606,15 @@
   </div>
 </div>
 
+<!-- 弹窗 5：分类明细 -->
+<div class="modal-overlay" id="breakdownDetailModal">
+  <div class="modal-box" style="text-align: left; max-width: 350px;">
+    <div class="modal-title" style="text-align: center;" id="breakdownDetailTitle">分类明细</div>
+    <div id="breakdownDetailList" style="max-height: 55vh; overflow-y: auto;"></div>
+    <button class="btn-main" style="background:#f1f5f9; color:var(--text-muted); margin-top: 14px;" onclick="closeBreakdownDetail()">关闭</button>
+  </div>
+</div>
+
 <script>
   const RATIO_STORAGE_KEY = 'salary_ratios_independent_100_v1';
 
@@ -1708,7 +1722,8 @@
       exportedAt: new Date().toISOString(),
       ratios,
       salaryRecords,
-      expenseRecords
+      expenseRecords,
+      customCategories
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -1752,9 +1767,14 @@
       tempEditRatios = { ...ratios };
       salaryRecords = data.salaryRecords;
       expenseRecords = data.expenseRecords;
+      if (Array.isArray(data.customCategories)) {
+        customCategories = data.customCategories.filter(c => typeof c === 'string');
+        localStorage.setItem(CUSTOM_CATEGORY_KEY, JSON.stringify(customCategories));
+      }
       editingSalaryId = null;
       editingExpenseId = null;
 
+      refreshCategoryOptions();
       saveStorage();
       updateRatioUI();
       resetFiltersToAll();
@@ -2056,7 +2076,48 @@
     document.getElementById('listTypeFilter').value = 'all';
     document.getElementById('yearFilter').value = 'all';
     document.getElementById('monthFilter').value = 'all';
+    document.getElementById('categoryFilter').value = 'all';
   }
+
+  /* ===== 自定义支出分类（保存在本地，下拉长期可选） ===== */
+  const CUSTOM_CATEGORY_KEY = 'expense_custom_categories';
+  let customCategories = safeParse(localStorage.getItem(CUSTOM_CATEGORY_KEY), []);
+  if (!Array.isArray(customCategories)) customCategories = [];
+
+  const baseCategories = ['餐饮', '交通', '购物', '居住', '娱乐', '医疗', '教育', '其他'];
+
+  function refreshCategoryOptions() {
+    const select = document.getElementById('expenseCategory');
+    if (!select) return;
+    const customOpt = select.querySelector('option[value="__custom__"]');
+    customCategories.forEach(name => {
+      if (select.querySelector(`option[value="${CSS.escape(name)}"]`)) return;
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.innerText = name;
+      select.insertBefore(opt, customOpt);
+    });
+  }
+
+  function handleCategoryChange() {
+    const select = document.getElementById('expenseCategory');
+    if (select.value !== '__custom__') return;
+
+    const name = prompt('输入自定义分类名称（如：买key）：');
+    if (!name || !name.trim()) {
+      select.value = '';
+      return;
+    }
+    const trimmed = name.trim().slice(0, 10);
+    if (!customCategories.includes(trimmed) && !baseCategories.includes(trimmed)) {
+      customCategories.push(trimmed);
+      localStorage.setItem(CUSTOM_CATEGORY_KEY, JSON.stringify(customCategories));
+    }
+    refreshCategoryOptions();
+    select.value = trimmed;
+  }
+
+  refreshCategoryOptions();
 
   function addOrUpdateSalary() {
     const incomeName = document.getElementById('incomeName').value.trim() || '收入';
@@ -2220,6 +2281,11 @@
   function editExpense(id) {
     const r = expenseRecords.find(item => item.id === id);
     if (!r) return;
+    // 记录里的分类可能还没出现在下拉里（如导入的备份），先补进去
+    if (r.category && !document.querySelector(`#expenseCategory option[value="${CSS.escape(r.category)}"]`)) {
+      customCategories.push(r.category);
+      refreshCategoryOptions();
+    }
     switchPage('entry');
     switchForm('expense');
     document.getElementById('expenseDate').value = r.date;
@@ -2234,8 +2300,10 @@
   function populateFilters() {
     const yearSelect = document.getElementById('yearFilter');
     const monthSelect = document.getElementById('monthFilter');
+    const categorySelect = document.getElementById('categoryFilter');
     const selectedYear = yearSelect.value;
     const selectedMonth = monthSelect.value;
+    const selectedCategory = categorySelect ? categorySelect.value : 'all';
 
     const allMonths = [...salaryRecords.map(r => r.month), ...expenseRecords.map(r => r.month)].filter(Boolean);
     const years = Array.from(new Set(allMonths.map(m => m.split('-')[0]))).sort().reverse();
@@ -2261,6 +2329,16 @@
       monthSelect.value = selectedMonth;
     } else {
       monthSelect.value = 'all';
+    }
+
+    if (categorySelect) {
+      const categories = Array.from(new Set(expenseRecords.map(r => r.category).filter(Boolean))).sort();
+      let categoryOptions = '<option value="all">全部分类</option>';
+      categories.forEach(c => {
+        categoryOptions += `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`;
+      });
+      categorySelect.innerHTML = categoryOptions;
+      categorySelect.value = (selectedCategory === 'all' || categories.includes(selectedCategory)) ? selectedCategory : 'all';
     }
   }
 
@@ -2564,9 +2642,17 @@
     };
   }
 
+  // 记录"分类/名称 -> 记录列表"的索引，供分类明细弹窗使用
+  let breakdownRecordsIndex = new Map();
+
   function getBreakdownData() {
     const { start, end, label } = getTrendRangeBounds();
     const map = new Map();
+    breakdownRecordsIndex = new Map();
+    const indexRecord = (key, record) => {
+      if (!breakdownRecordsIndex.has(key)) breakdownRecordsIndex.set(key, []);
+      breakdownRecordsIndex.get(key).push(record);
+    };
 
     if (breakdownMode === 'expense') {
       expenseRecords.forEach(record => {
@@ -2584,6 +2670,7 @@
             : (accountNames[record.account] || record.account || '其他'));
 
         map.set(key, (map.get(key) || 0) + Number(record.amount || 0));
+        indexRecord(key, record);
       });
     } else {
       salaryRecords.forEach(record => {
@@ -2592,6 +2679,7 @@
 
         const key = (record.incomeName || '收入').trim() || '收入';
         map.set(key, (map.get(key) || 0) + Number(record.total || 0));
+        indexRecord(key, record);
       });
     }
 
@@ -2640,13 +2728,14 @@
     if (incomeBtn) incomeBtn.classList.toggle('active', breakdownMode === 'income');
 
     const { data, label } = getBreakdownData();
+    breakdownDetailNames = data.map(d => d.name);
     const total = data.reduce((sum, item) => sum + item.value, 0);
 
     if (subtitle) {
       const modeText = trendViewMode === 'year' ? '年' : trendViewMode === 'month' ? '月' : '日';
       subtitle.textContent = breakdownMode === 'expense'
-        ? `${label} · 支出优先按分类统计，无分类时按备注/账户归类`
-        : `${label} · 收入按收入名称分类，并跟随当前${modeText}视图联动`;
+        ? `${label} · 支出优先按分类统计，无分类时按备注/账户归类；点击图例看明细`
+        : `${label} · 收入按收入名称分类；点击图例看明细`;
     }
 
     if (centerLabel) centerLabel.textContent = breakdownMode === 'expense' ? '总支出' : '总收入';
@@ -2696,7 +2785,7 @@
     legendEl.innerHTML = data.slice(0, 6).map((item, index) => {
       const pct = total ? (item.value / total * 100) : 0;
       return `
-        <div class="breakdown-legend-row">
+        <div class="breakdown-legend-row" style="cursor:pointer;" onclick="showBreakdownDetail(${index})">
           <div class="breakdown-legend-main">
             <span class="breakdown-dot" style="background:${colors[index]}"></span>
             <span class="breakdown-legend-name">${escapeHTML(item.name)}</span>
@@ -2769,6 +2858,51 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  /* ===== 分类明细弹窗：点饼图图例查看该分类下每笔记录 ===== */
+  let breakdownDetailNames = [];
+
+  function showBreakdownDetail(index) {
+    const records = breakdownRecordsIndex.get(breakdownDetailNames[index]);
+    if (!records || !records.length) return;
+
+    const titleEl = document.getElementById('breakdownDetailTitle');
+    const listEl = document.getElementById('breakdownDetailList');
+    const modal = document.getElementById('breakdownDetailModal');
+
+    const isIncome = breakdownMode === 'income';
+    const total = records.reduce((sum, r) => sum + Number(isIncome ? r.total : r.amount || 0), 0);
+    if (titleEl) {
+      const rangeLabel = getTrendRangeBounds().label;
+      titleEl.innerText = `${breakdownDetailNames[index]} · ${formatCompactMoney(total)}（${rangeLabel}）`;
+    }
+
+    const sorted = [...records].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    if (listEl) {
+      listEl.innerHTML = sorted.map(r => {
+        const amount = Number(isIncome ? r.total : r.amount || 0);
+        const mainText = isIncome
+          ? (r.incomeName || '收入')
+          : (r.note && r.note !== '无备注' ? r.note : accountNames[r.account] || '支出');
+        return `
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; padding:9px 2px; border-bottom:1px solid var(--border); font-size:0.8rem;">
+          <div style="min-width:0;">
+            <div style="font-weight:600; word-break:break-all;">${escapeHTML(mainText)}</div>
+            <div style="font-size:0.68rem; color:var(--text-dim); margin-top:2px;">${escapeHTML(r.date)}${!isIncome && r.category ? ` · ${escapeHTML(r.category)}` : ''}</div>
+          </div>
+          <div style="font-weight:800; ${isIncome ? '' : 'color:var(--expense);'} white-space:nowrap; font-variant-numeric:tabular-nums;">${isIncome ? '+' : '-'}${formatCompactMoney(amount)}</div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    if (modal) modal.classList.add('active');
+  }
+
+  function closeBreakdownDetail() {
+    const modal = document.getElementById('breakdownDetailModal');
+    if (modal) modal.classList.remove('active');
   }
 
 
@@ -3290,6 +3424,31 @@
     chartAnimationFrame = requestAnimationFrame(animate);
   }
 
+  // 月度小结：默认当前月，可通过选择器查看任意月份
+  function renderMonthSummary() {
+    const picker = document.getElementById('monthSummaryPicker');
+    const month = (picker && picker.value) || currentMonthStr;
+    if (picker && !picker.value) picker.value = currentMonthStr;
+
+    const monthIn = salaryRecords
+      .filter(r => (r.month || '') === month)
+      .reduce((sum, r) => sum + Number(r.total || 0), 0);
+    const monthOut = expenseRecords
+      .filter(r => (r.month || '') === month)
+      .reduce((sum, r) => sum + Number(r.amount || 0), 0);
+    const monthNet = monthIn - monthOut;
+
+    const inEl = document.getElementById('monthSummaryIn');
+    const outEl = document.getElementById('monthSummaryOut');
+    const netEl = document.getElementById('monthSummaryNet');
+    if (inEl) inEl.innerText = formatCompactMoney(monthIn);
+    if (outEl) outEl.innerText = formatCompactMoney(monthOut);
+    if (netEl) {
+      netEl.innerText = formatCompactMoney(monthNet);
+      netEl.style.color = monthNet < 0 ? 'var(--expense)' : 'var(--text)';
+    }
+  }
+
   function render() {
     populateFilters();
 
@@ -3329,25 +3488,7 @@
 
     document.getElementById('balanceSummaryTotal').innerText = formatCompactMoney(netTotal);
 
-    // 本月小结
-    const monthIn = salaryRecords
-      .filter(r => (r.month || '') === currentMonthStr)
-      .reduce((sum, r) => sum + Number(r.total || 0), 0);
-    const monthOut = expenseRecords
-      .filter(r => (r.month || '') === currentMonthStr)
-      .reduce((sum, r) => sum + Number(r.amount || 0), 0);
-    const monthNet = monthIn - monthOut;
-    const monthTitleEl = document.getElementById('monthSummaryTitle');
-    const monthInEl = document.getElementById('monthSummaryIn');
-    const monthOutEl = document.getElementById('monthSummaryOut');
-    const monthNetEl = document.getElementById('monthSummaryNet');
-    if (monthTitleEl) monthTitleEl.innerText = currentMonthStr;
-    if (monthInEl) monthInEl.innerText = formatCompactMoney(monthIn);
-    if (monthOutEl) monthOutEl.innerText = formatCompactMoney(monthOut);
-    if (monthNetEl) {
-      monthNetEl.innerText = formatCompactMoney(monthNet);
-      monthNetEl.style.color = monthNet < 0 ? 'var(--expense)' : 'var(--text)';
-    }
+    renderMonthSummary();
 
     animateValueElements();
     renderTrendChart();
@@ -3356,6 +3497,7 @@
     const yearFilter = document.getElementById('yearFilter').value;
     const monthFilter = document.getElementById('monthFilter').value;
     const typeFilter = document.getElementById('listTypeFilter').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
 
     let combined = [];
     if (typeFilter === 'all' || typeFilter === 'salary') {
@@ -3363,6 +3505,11 @@
     }
     if (typeFilter === 'all' || typeFilter === 'expense') {
       combined = combined.concat(expenseRecords);
+    }
+
+    // 选中具体分类时，只保留该分类的支出记录
+    if (categoryFilter !== 'all') {
+      combined = combined.filter(r => r.type === 'expense' && r.category === categoryFilter);
     }
 
     combined.sort((a, b) => {
