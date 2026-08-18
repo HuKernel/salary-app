@@ -444,6 +444,217 @@
 
 
 
+
+    .breakdown-section {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .breakdown-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .breakdown-title {
+      font-size: 0.9rem;
+      font-weight: 750;
+      color: var(--text);
+    }
+
+    .breakdown-subtitle {
+      margin-top: 3px;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      line-height: 1.35;
+    }
+
+    .breakdown-switcher {
+      display: inline-flex;
+      gap: 3px;
+      background: #f1f5f9;
+      border-radius: 10px;
+      padding: 3px;
+      flex-shrink: 0;
+    }
+
+    .breakdown-switch-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 6px 9px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+
+    .breakdown-switch-btn.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(15,23,42,0.07);
+    }
+
+    .breakdown-content {
+      display: grid;
+      grid-template-columns: 145px minmax(0, 1fr);
+      gap: 13px;
+      align-items: center;
+      min-height: 150px;
+    }
+
+    .donut-wrap {
+      position: relative;
+      width: 145px;
+      height: 145px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .breakdown-chart {
+      width: 145px;
+      height: 145px;
+      display: block;
+      touch-action: manipulation;
+    }
+
+    .donut-center {
+      position: absolute;
+      inset: 37px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      box-shadow: inset 0 0 0 1px rgba(226,232,240,0.55);
+      text-align: center;
+      padding: 5px;
+    }
+
+    .donut-center span {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+
+    .donut-center strong {
+      font-size: 0.83rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+      max-width: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .breakdown-empty {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      line-height: 1.35;
+      padding: 26px;
+      background: #fafafa;
+      border: 1px dashed var(--border-dark);
+    }
+
+    .breakdown-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .breakdown-legend-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .breakdown-legend-row:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .breakdown-legend-main {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .breakdown-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .breakdown-legend-name {
+      min-width: 0;
+      font-size: 0.73rem;
+      font-weight: 650;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .breakdown-legend-value {
+      text-align: right;
+      font-size: 0.72rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .breakdown-legend-value small {
+      display: block;
+      color: var(--text-dim);
+      font-size: 0.63rem;
+      margin-top: 1px;
+    }
+
+    @media (max-width: 365px) {
+      .breakdown-content {
+        grid-template-columns: 128px minmax(0, 1fr);
+        gap: 10px;
+      }
+
+      .donut-wrap,
+      .breakdown-chart {
+        width: 128px;
+        height: 128px;
+      }
+
+      .donut-center {
+        inset: 33px;
+      }
+
+      .breakdown-switch-btn {
+        padding-left: 7px;
+        padding-right: 7px;
+      }
+    }
+
+
     /* ===== 页面切换沉浸式动效（收纳盒展开感） ===== */
     .summary-grid {
       perspective: 1200px;
@@ -1021,12 +1232,37 @@
         <span id="trendRangeText"><strong>当前范围：</strong>--</span>
         <span id="trendHintText"><strong>说明：</strong>净资产线会联动显示当前所选范围内的累计变化。</span>
       </div>
+      <div class="breakdown-section">
+        <div class="breakdown-head">
+          <div>
+            <div class="breakdown-title">分类构成</div>
+            <div class="breakdown-subtitle" id="breakdownSubtitle">跟随当前时间范围统计；支出优先按备注分类，无备注时按账户分类</div>
+          </div>
+          <div class="breakdown-switcher">
+            <button class="breakdown-switch-btn active" id="breakdownExpenseBtn" onclick="setBreakdownMode('expense')">支出分类</button>
+            <button class="breakdown-switch-btn" id="breakdownIncomeBtn" onclick="setBreakdownMode('income')">收入分类</button>
+          </div>
+        </div>
+
+        <div class="breakdown-content">
+          <div class="donut-wrap">
+            <canvas id="breakdownChart" class="breakdown-chart"></canvas>
+            <div class="donut-center">
+              <span id="breakdownCenterLabel">支出</span>
+              <strong id="breakdownCenterValue">¥0.00</strong>
+            </div>
+            <div class="breakdown-empty" id="breakdownEmpty" style="display:none;">当前范围暂无分类数据</div>
+          </div>
+          <div class="breakdown-legend" id="breakdownLegend"></div>
+        </div>
+      </div>
+      <div class="trend-footnote">已优化为多时间维度查看：年视图的 x 轴是月份，月视图的 x 轴是日期，日视图的 x 轴是时间。</div>
     </div>
   </section>
 
   <!-- 录入模块 -->
   <section class="card page-view" id="pageEntry">
-    <div class="page-caption">任意收入都可以自定义名称并按当前比例分配，日常消费从对应账户直接扣减。</div>
+    <div class="page-caption">任意收入都可以自定义名称与具体入账日期，并按当前比例分配；日常消费从对应账户直接扣减。</div>
     <div class="tab-nav">
       <button class="tab-btn active" id="tabSalaryBtn" onclick="switchForm('salary')">收入入账</button>
       <button class="tab-btn" id="tabExpenseBtn" onclick="switchForm('expense')">支出扣减</button>
@@ -1039,8 +1275,8 @@
           <input type="text" id="incomeName" placeholder="如：工资、奖金、兼职、报销">
         </div>
         <div class="input-field">
-          <label>入账月份</label>
-          <input type="month" id="salaryMonth">
+          <label>入账日期</label>
+          <input type="date" id="salaryDate">
         </div>
         <div class="input-field">
           <label>入账金额 (¥)</label>
@@ -1247,6 +1483,8 @@
   let expenseRecords = JSON.parse(localStorage.getItem('expense_records') || '[]');
   let editingSalaryId = null;
   let pendingDelete = null;
+  let breakdownMode = localStorage.getItem('salary_breakdown_mode') || 'expense';
+  let breakdownAnimationFrame = null;
 
   const orderKeys = ['life', 'save', 'fund', 'invest'];
   const accountNames = {
@@ -1263,7 +1501,7 @@
   let trendSelectedYear = String(now.getFullYear());
   let trendSelectedMonth = currentMonthStr;
   let trendSelectedDate = currentDateStr;
-  document.getElementById('salaryMonth').value = currentMonthStr;
+  document.getElementById('salaryDate').value = currentDateStr;
   document.getElementById('expenseDate').value = currentDateStr;
 
   function saveStorage() {
@@ -1535,7 +1773,10 @@
 
     try { localStorage.setItem('salary_app_active_page', page); } catch (e) {}
     if (page === 'overview') {
-      setTimeout(renderTrendChart, 30);
+      setTimeout(() => {
+        renderTrendChart();
+        renderBreakdownChart();
+      }, 30);
     }
     setTimeout(() => triggerPageVisuals(page), 20);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1570,14 +1811,16 @@
 
   function addOrUpdateSalary() {
     const incomeName = document.getElementById('incomeName').value.trim() || '收入';
-    const month = document.getElementById('salaryMonth').value;
+    const date = document.getElementById('salaryDate').value;
     const amount = parseFloat(document.getElementById('salaryAmount').value);
     const isEditing = !!editingSalaryId;
 
-    if (!month || isNaN(amount) || amount <= 0) {
-      alert('请输入正确的入账月份与金额');
+    if (!date || isNaN(amount) || amount <= 0) {
+      alert('请输入正确的入账日期与金额');
       return;
     }
+
+    const month = date.slice(0, 7);
 
     const alloc = {
       life: amount * (ratios.life / 100),
@@ -1590,16 +1833,24 @@
     if (editingSalaryId) {
       const idx = salaryRecords.findIndex(r => r.id === editingSalaryId);
       if (idx !== -1) {
-        salaryRecords[idx] = { ...salaryRecords[idx], incomeName, month, total: amount, createdAt: salaryRecords[idx].createdAt || new Date(salaryRecords[idx].id || Date.now()).toISOString(), ...alloc };
+        salaryRecords[idx] = {
+          ...salaryRecords[idx],
+          incomeName,
+          date,
+          month,
+          total: amount,
+          createdAt: salaryRecords[idx].createdAt || new Date(salaryRecords[idx].id || Date.now()).toISOString(),
+          ...alloc
+        };
       }
       editingSalaryId = null;
     } else {
       salaryRecords.unshift({
         id: Date.now(),
         type: 'salary',
-        date: `${month}-01`,
-        month: month,
-        incomeName: incomeName,
+        date,
+        month,
+        incomeName,
         total: amount,
         createdAt: new Date().toISOString(),
         ...alloc
@@ -1609,6 +1860,7 @@
     saveStorage();
     document.getElementById('incomeName').value = '';
     document.getElementById('salaryAmount').value = '';
+    document.getElementById('salaryDate').value = currentDateStr;
     resetFiltersToAll();
     render();
     showToast(isEditing ? '收入记录已更新' : '收入已成功入账');
@@ -1678,7 +1930,7 @@
     switchPage('entry');
     switchForm('salary');
     document.getElementById('incomeName').value = r.incomeName || '工资';
-    document.getElementById('salaryMonth').value = r.month;
+    document.getElementById('salaryDate').value = r.date || `${r.month}-01`;
     document.getElementById('salaryAmount').value = r.total;
     editingSalaryId = id;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1836,6 +2088,7 @@
     ensureTrendPickerValues();
     updateTrendControlUI();
     renderTrendChart();
+    renderBreakdownChart();
   }
 
   function onTrendPickerChange() {
@@ -1854,38 +2107,57 @@
     }
     if (datePicker) trendSelectedDate = datePicker.value || currentDateStr;
     renderTrendChart();
+    renderBreakdownChart();
   }
 
   function getSalaryEventDateTime(record) {
+    const explicitDate = record.date || (record.month ? `${record.month}-01` : currentDateStr);
+
+    let sourceTime = null;
     if (record.createdAt) {
       const created = new Date(record.createdAt);
-      if (!isNaN(created)) return created;
+      if (!isNaN(created)) sourceTime = created;
     }
-    if (record.id) {
+    if (!sourceTime && record.id) {
       const maybe = new Date(Number(record.id));
-      if (!isNaN(maybe)) return maybe;
+      if (!isNaN(maybe)) sourceTime = maybe;
     }
-    const baseMonth = record.month || currentMonthStr;
-    return new Date(`${baseMonth}-01T09:00:00`);
+
+    const hour = sourceTime ? pad(sourceTime.getHours()) : '09';
+    const minute = sourceTime ? pad(sourceTime.getMinutes()) : '00';
+    const second = sourceTime ? pad(sourceTime.getSeconds()) : '00';
+
+    return new Date(`${explicitDate}T${hour}:${minute}:${second}`);
   }
 
   function getExpenseEventDateTime(record) {
+    const explicitDate = record.date || (record.month ? `${record.month}-01` : currentDateStr);
+
+    let sourceTime = null;
+
     if (record.createdAt) {
       const created = new Date(record.createdAt);
-      if (!isNaN(created)) return created;
+      if (!isNaN(created)) sourceTime = created;
     }
-    if (record.id) {
+
+    if (!sourceTime && record.id) {
       const maybe = new Date(Number(record.id));
-      if (!isNaN(maybe)) return maybe;
+      if (!isNaN(maybe)) sourceTime = maybe;
     }
-    const baseDate = record.date || `${currentMonthStr}-01`;
-    return new Date(`${baseDate}T12:00:00`);
+
+    // 日期：以用户填写的支出日期为准
+    // 时间：优先使用实际录入时间；老数据没有时间时默认 12:00
+    const hour = sourceTime ? pad(sourceTime.getHours()) : '12';
+    const minute = sourceTime ? pad(sourceTime.getMinutes()) : '00';
+    const second = sourceTime ? pad(sourceTime.getSeconds()) : '00';
+
+    return new Date(`${explicitDate}T${hour}:${minute}:${second}`);
   }
 
   function getUnifiedEvents() {
     const incomeEvents = salaryRecords.map(item => {
       const dateTime = getSalaryEventDateTime(item);
-      const dateKey = item.month ? `${item.month}-01` : formatDateLocal(dateTime);
+      const dateKey = item.date || (item.month ? `${item.month}-01` : formatDateLocal(dateTime));
       return {
         type: 'income',
         amount: Number(item.total || 0),
@@ -1896,6 +2168,7 @@
 
     const expenseEvents = expenseRecords.map(item => {
       const dateTime = getExpenseEventDateTime(item);
+      // dateKey 与 dateTime 使用同一个业务日期，避免补录历史支出时日图漏掉该笔记录
       const dateKey = item.date || formatDateLocal(dateTime);
       return {
         type: 'expense',
@@ -1956,6 +2229,252 @@
   }
 
 
+
+  function setBreakdownMode(mode) {
+    breakdownMode = mode === 'income' ? 'income' : 'expense';
+    try { localStorage.setItem('salary_breakdown_mode', breakdownMode); } catch (e) {}
+
+    const expenseBtn = document.getElementById('breakdownExpenseBtn');
+    const incomeBtn = document.getElementById('breakdownIncomeBtn');
+    if (expenseBtn) expenseBtn.classList.toggle('active', breakdownMode === 'expense');
+    if (incomeBtn) incomeBtn.classList.toggle('active', breakdownMode === 'income');
+
+    renderBreakdownChart();
+  }
+
+  function getTrendRangeBounds() {
+    if (trendViewMode === 'year') {
+      const year = parseInt(trendSelectedYear, 10) || now.getFullYear();
+      return {
+        start: new Date(year, 0, 1, 0, 0, 0, 0),
+        end: new Date(year + 1, 0, 1, 0, 0, 0, 0),
+        label: `${year}年`
+      };
+    }
+
+    if (trendViewMode === 'month') {
+      const [year, month] = (trendSelectedMonth || currentMonthStr).split('-').map(Number);
+      return {
+        start: new Date(year, month - 1, 1, 0, 0, 0, 0),
+        end: new Date(year, month, 1, 0, 0, 0, 0),
+        label: `${trendSelectedMonth}`
+      };
+    }
+
+    const start = new Date(`${trendSelectedDate || currentDateStr}T00:00:00`);
+    return {
+      start,
+      end: new Date(start.getTime() + 24 * 60 * 60 * 1000),
+      label: trendSelectedDate || currentDateStr
+    };
+  }
+
+  function getBreakdownData() {
+    const { start, end, label } = getTrendRangeBounds();
+    const map = new Map();
+
+    if (breakdownMode === 'expense') {
+      expenseRecords.forEach(record => {
+        const dt = getExpenseEventDateTime(record);
+        if (dt < start || dt >= end) return;
+
+        const rawNote = String(record.note || '').trim();
+        const hasUsefulNote = rawNote && rawNote !== '无备注';
+
+        // 优先按备注分类；没有备注时，回退到原来的账户分类
+        const key = hasUsefulNote
+          ? rawNote
+          : (accountNames[record.account] || record.account || '其他');
+
+        map.set(key, (map.get(key) || 0) + Number(record.amount || 0));
+      });
+    } else {
+      salaryRecords.forEach(record => {
+        const dt = getSalaryEventDateTime(record);
+        if (dt < start || dt >= end) return;
+
+        const key = (record.incomeName || '收入').trim() || '收入';
+        map.set(key, (map.get(key) || 0) + Number(record.total || 0));
+      });
+    }
+
+    const data = Array.from(map.entries())
+      .map(([name, value]) => ({ name, value }))
+      .filter(item => item.value > 0)
+      .sort((a, b) => b.value - a.value);
+
+    return { data, label };
+  }
+
+  function getBreakdownColors(count) {
+    const styles = getComputedStyle(document.documentElement);
+    const semantic = breakdownMode === 'expense'
+      ? ['#e11d48', '#f59e0b', '#8b5cf6', '#3b82f6', '#64748b', '#10b981']
+      : ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#64748b', '#e11d48'];
+
+    return Array.from({ length: count }, (_, i) => semantic[i % semantic.length]);
+  }
+
+  function drawDonutSegment(ctx, cx, cy, radius, innerRadius, startAngle, endAngle, color, progress) {
+    const animatedEnd = startAngle + (endAngle - startAngle) * progress;
+    if (animatedEnd <= startAngle) return;
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, startAngle, animatedEnd);
+    ctx.arc(cx, cy, innerRadius, animatedEnd, startAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function renderBreakdownChart() {
+    const canvas = document.getElementById('breakdownChart');
+    const emptyEl = document.getElementById('breakdownEmpty');
+    const legendEl = document.getElementById('breakdownLegend');
+    const centerLabel = document.getElementById('breakdownCenterLabel');
+    const centerValue = document.getElementById('breakdownCenterValue');
+    const subtitle = document.getElementById('breakdownSubtitle');
+    const expenseBtn = document.getElementById('breakdownExpenseBtn');
+    const incomeBtn = document.getElementById('breakdownIncomeBtn');
+
+    if (!canvas || !emptyEl || !legendEl) return;
+
+    if (expenseBtn) expenseBtn.classList.toggle('active', breakdownMode === 'expense');
+    if (incomeBtn) incomeBtn.classList.toggle('active', breakdownMode === 'income');
+
+    const { data, label } = getBreakdownData();
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+
+    if (subtitle) {
+      const modeText = trendViewMode === 'year' ? '年' : trendViewMode === 'month' ? '月' : '日';
+      subtitle.textContent = breakdownMode === 'expense'
+        ? `${label} · 支出优先按备注分类，无备注时按账户分类`
+        : `${label} · 收入按收入名称分类，并跟随当前${modeText}视图联动`;
+    }
+
+    if (centerLabel) centerLabel.textContent = breakdownMode === 'expense' ? '总支出' : '总收入';
+    if (centerValue) centerValue.textContent = `¥${total.toFixed(2)}`;
+
+    if (!data.length || total <= 0) {
+      canvas.style.display = 'none';
+      emptyEl.style.display = 'flex';
+      legendEl.innerHTML = `<div style="font-size:0.72rem;color:var(--text-dim);line-height:1.5;">当前范围暂无${breakdownMode === 'expense' ? '支出' : '收入'}分类数据</div>`;
+      return;
+    }
+
+    canvas.style.display = 'block';
+    emptyEl.style.display = 'none';
+
+    const rect = canvas.getBoundingClientRect();
+    const cssWidth = Math.max(rect.width || 145, 100);
+    const cssHeight = Math.max(rect.height || 145, 100);
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.floor(cssWidth * dpr);
+    canvas.height = Math.floor(cssHeight * dpr);
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    const cx = cssWidth / 2;
+    const cy = cssHeight / 2;
+    const radius = Math.min(cssWidth, cssHeight) / 2 - 3;
+    const innerRadius = radius * 0.58;
+    const colors = getBreakdownColors(data.length);
+
+    let angle = -Math.PI / 2;
+    const segments = data.map((item, index) => {
+      const sweep = (item.value / total) * Math.PI * 2;
+      const segment = {
+        ...item,
+        color: colors[index],
+        startAngle: angle,
+        endAngle: angle + sweep
+      };
+      angle += sweep;
+      return segment;
+    });
+
+    legendEl.innerHTML = data.slice(0, 6).map((item, index) => {
+      const pct = total ? (item.value / total * 100) : 0;
+      return `
+        <div class="breakdown-legend-row">
+          <div class="breakdown-legend-main">
+            <span class="breakdown-dot" style="background:${colors[index]}"></span>
+            <span class="breakdown-legend-name">${escapeHTML(item.name)}</span>
+          </div>
+          <div class="breakdown-legend-value">
+            ¥${item.value.toFixed(2)}
+            <small>${pct.toFixed(1)}%</small>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (data.length > 6) {
+      const restCount = data.length - 6;
+      legendEl.insertAdjacentHTML('beforeend',
+        `<div style="font-size:0.66rem;color:var(--text-dim);padding-top:2px;">另有 ${restCount} 个较小分类</div>`
+      );
+    }
+
+    if (breakdownAnimationFrame) cancelAnimationFrame(breakdownAnimationFrame);
+
+    const paint = progress => {
+      ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+      // base ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.arc(cx, cy, innerRadius, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fill();
+
+      segments.forEach(seg => {
+        drawDonutSegment(
+          ctx, cx, cy, radius, innerRadius,
+          seg.startAngle, seg.endAngle, seg.color, progress
+        );
+      });
+    };
+
+    const prefersReducedMotion = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      paint(1);
+      return;
+    }
+
+    const start = performance.now();
+    const duration = 460;
+
+    const animate = t => {
+      const raw = Math.min(1, (t - start) / duration);
+      const eased = 1 - Math.pow(1 - raw, 3);
+      paint(eased);
+
+      if (raw < 1) {
+        breakdownAnimationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    paint(0);
+    breakdownAnimationFrame = requestAnimationFrame(animate);
+  }
+
+  function escapeHTML(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+
   function getTrendSeries() {
     ensureTrendPickerValues();
     updateTrendControlUI();
@@ -2009,7 +2528,6 @@
       }));
 
       events.forEach(event => {
-        const eventDateKey = event.type === 'income' ? (salaryRecords.find(r => Number(r.total || 0) === event.amount && getSalaryEventDateTime(r).getTime() === event.dateTime.getTime())?.month ? `${event.dateTime.getFullYear()}-${pad(event.dateTime.getMonth()+1)}-01` : event.dateKey) : event.dateKey;
         const dateObj = new Date(`${event.dateKey}T00:00:00`);
         if (dateObj >= startDate && dateObj < endDate) {
           const dayIndex = dateObj.getDate() - 1;
@@ -2188,13 +2706,19 @@
 
   function drillDownTrendDay() {
     if (!selectedTrendDay) return;
-    trendSelectedDate = selectedTrendDay;
+
+    const targetDate = selectedTrendDay;
+    trendSelectedDate = targetDate;
+
     const datePicker = document.getElementById('trendDatePicker');
-    if (datePicker) datePicker.value = selectedTrendDay;
+    if (datePicker) datePicker.value = targetDate;
+
     setTrendView('day');
+
     const card = document.getElementById('trendDetailCard');
     if (card) card.classList.remove('show');
-    showToast(`已切换到 ${selectedTrendDay} 日视图`);
+
+    showToast(`已切换到 ${targetDate} 日视图`);
   }
 
   function getTrendIndexFromPointer(evt) {
@@ -2504,6 +3028,7 @@
     document.getElementById('balanceSummaryTotal').innerText = `¥${netTotal.toFixed(2)}`;
     animateValueElements();
     renderTrendChart();
+    renderBreakdownChart();
 
     const yearFilter = document.getElementById('yearFilter').value;
     const monthFilter = document.getElementById('monthFilter').value;
@@ -2549,7 +3074,7 @@
         return `
           <div class="record-item">
             <div class="record-header">
-              <span class="record-date">${r.month} ${r.incomeName || '工资'}入账</span>
+              <span class="record-date">${r.date || `${r.month}-01`} ${r.incomeName || '工资'}入账</span>
               <span class="record-amount in">+¥${Number(r.total).toFixed(2)}</span>
             </div>
             <div class="record-tags">
@@ -2560,7 +3085,7 @@
             </div>
             <div class="record-actions">
               <button class="btn-action-edit" onclick="editSalary(${r.id})">编辑</button>
-              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'salary', '${r.month} ${r.incomeName || '工资'}入账')">删除</button>
+              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'salary', '${r.date || `${r.month}-01`} ${r.incomeName || '工资'}入账')">删除</button>
             </div>
           </div>
         `;
@@ -2596,11 +3121,15 @@
   updateTrendControlUI();
   updateRatioUI();
   render();
+  renderBreakdownChart();
   setTimeout(() => {
     const initialPage = localStorage.getItem('salary_app_active_page') || 'overview';
     triggerPageVisuals(initialPage);
   }, 80);
-  window.addEventListener('resize', renderTrendChart);
+  window.addEventListener('resize', () => {
+    renderTrendChart();
+    renderBreakdownChart();
+  });
 </script>
 </body>
 </html>
