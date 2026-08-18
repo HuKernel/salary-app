@@ -1210,6 +1210,7 @@
     <div class="header-actions">
       <button class="btn-header-action" onclick="openReminderModal()">🔔 提醒</button>
       <button class="btn-header-action" onclick="openRatioModal()">配比</button>
+      <button class="btn-header-action" onclick="openBackupModal()">备份</button>
     </div>
   </header>
 
@@ -1251,6 +1252,28 @@
         </div>
         <div class="val" id="balInvest">¥0.00</div>
         <div class="summary-sub" id="subInvest">入¥0 | 支¥0</div>
+      </div>
+    </div>
+
+    <!-- 本月小结 -->
+    <div style="margin-top: 12px; padding: 12px; border-radius: 12px; background: #fafafa; border: 1px solid var(--border);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">本月小结</span>
+        <span style="font-size: 0.7rem; color: var(--text-dim); font-variant-numeric: tabular-nums;" id="monthSummaryTitle">--</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; text-align: center;">
+        <div>
+          <div style="font-size: 0.68rem; color: var(--text-dim);">收入</div>
+          <div style="font-size: 0.92rem; font-weight: 800; color: #10b981; font-variant-numeric: tabular-nums;" id="monthSummaryIn">¥0.00</div>
+        </div>
+        <div>
+          <div style="font-size: 0.68rem; color: var(--text-dim);">支出</div>
+          <div style="font-size: 0.92rem; font-weight: 800; color: var(--expense); font-variant-numeric: tabular-nums;" id="monthSummaryOut">¥0.00</div>
+        </div>
+        <div>
+          <div style="font-size: 0.68rem; color: var(--text-dim);">结余</div>
+          <div style="font-size: 0.92rem; font-weight: 800; font-variant-numeric: tabular-nums;" id="monthSummaryNet">¥0.00</div>
+        </div>
       </div>
     </div>
 
@@ -1296,13 +1319,12 @@
       </div>
       <div class="trend-meta">
         <span id="trendRangeText"><strong>当前范围：</strong>--</span>
-        <span id="trendHintText"><strong>累计汇总：</strong>收入 ¥0.00 ｜ 支出 ¥0.00 ｜ 余额 ¥0.00</span>
       </div>
       <div class="breakdown-section">
         <div class="breakdown-head">
           <div>
             <div class="breakdown-title">分类构成</div>
-            <div class="breakdown-subtitle" id="breakdownSubtitle">跟随当前时间范围统计；支出优先按备注分类，无备注时按账户分类</div>
+            <div class="breakdown-subtitle" id="breakdownSubtitle">跟随当前时间范围统计；支出优先按分类统计，无分类时按备注/账户归类</div>
           </div>
           <div class="breakdown-switcher">
             <button class="breakdown-switch-btn active" id="breakdownExpenseBtn" onclick="setBreakdownMode('expense')">支出分类</button>
@@ -1370,6 +1392,20 @@
         <div class="input-field">
           <label>支出金额 (¥)</label>
           <input type="number" id="expenseAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+        </div>
+        <div class="input-field">
+          <label>支出分类</label>
+          <select id="expenseCategory">
+            <option value="">不分类</option>
+            <option value="餐饮">餐饮</option>
+            <option value="交通">交通</option>
+            <option value="购物">购物</option>
+            <option value="居住">居住</option>
+            <option value="娱乐">娱乐</option>
+            <option value="医疗">医疗</option>
+            <option value="教育">教育</option>
+            <option value="其他">其他</option>
+          </select>
         </div>
         <div class="input-field">
           <label>用途备注</label>
@@ -1548,15 +1584,55 @@
   </div>
 </div>
 
+<!-- 弹窗 4：数据备份 / 恢复 -->
+<div class="modal-overlay" id="backupModal">
+  <div class="modal-box">
+    <div class="modal-title">数据备份与恢复</div>
+    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; text-align: left;">
+      数据保存在当前浏览器中，换设备或清缓存会丢失。建议定期导出备份文件；在另一台设备上导入即可恢复全部数据。
+    </div>
+    <button class="btn-main" onclick="exportBackup()">📤 导出备份文件 (.json)</button>
+    <div style="margin-top: 10px;">
+      <button class="btn-action-edit" style="width: 100%; padding: 10px;" onclick="document.getElementById('backupFileInput').click()">📥 从备份文件恢复</button>
+    </div>
+    <div id="backupStatusText" style="margin: 12px 0 0; font-size: 0.72rem; color: var(--text-dim); line-height: 1.5;">导入会覆盖当前设备上的全部记录（含分配比例）</div>
+    <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="handleBackupImport(event)">
+    <button class="btn-main" style="background:#f1f5f9; color:var(--text-muted); margin-top: 14px;" onclick="closeBackupModal()">关闭</button>
+  </div>
+</div>
+
 <script>
   const RATIO_STORAGE_KEY = 'salary_ratios_independent_100_v1';
+
+  // localStorage 数据损坏时降级为默认值，避免页面白屏
+  function safeParse(json, fallback) {
+    try {
+      const parsed = JSON.parse(json);
+      return parsed === null || parsed === undefined ? fallback : parsed;
+    } catch (e) {
+      console.warn('本地数据解析失败，已使用默认值', e);
+      return fallback;
+    }
+  }
+
+  // 纯 Date.now() 同秒录入会碰撞，加自增序列保证唯一
+  let idSeq = 0;
+  function genId() {
+    idSeq = (idSeq + 1) % 1000;
+    return Date.now() * 1000 + idSeq;
+  }
+
   let defaultRatios = { life: 40, save: 30, fund: 20, invest: 10 };
-  let ratios = JSON.parse(localStorage.getItem(RATIO_STORAGE_KEY)) || defaultRatios;
+  let ratios = safeParse(localStorage.getItem(RATIO_STORAGE_KEY), defaultRatios);
+  if (!ratios || typeof ratios !== 'object') ratios = { ...defaultRatios };
 
   let tempEditRatios = { ...ratios };
-  let salaryRecords = JSON.parse(localStorage.getItem('salary_records') || '[]');
-  let expenseRecords = JSON.parse(localStorage.getItem('expense_records') || '[]');
+  let salaryRecords = safeParse(localStorage.getItem('salary_records'), []);
+  let expenseRecords = safeParse(localStorage.getItem('expense_records'), []);
+  if (!Array.isArray(salaryRecords)) salaryRecords = [];
+  if (!Array.isArray(expenseRecords)) expenseRecords = [];
   let editingSalaryId = null;
+  let editingExpenseId = null;
   let pendingDelete = null;
 
   let currentRecordPage = 1;
@@ -1615,6 +1691,79 @@
   }
   function closeReminderModal() {
     document.getElementById('reminderModal').classList.remove('active');
+  }
+
+  /* ===== 数据备份 / 恢复 ===== */
+  function openBackupModal() {
+    document.getElementById('backupModal').classList.add('active');
+  }
+  function closeBackupModal() {
+    document.getElementById('backupModal').classList.remove('active');
+  }
+
+  function exportBackup() {
+    const payload = {
+      app: 'salary-book',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      ratios,
+      salaryRecords,
+      expenseRecords
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `账本备份-${currentDateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('备份文件已导出，请妥善保存');
+  }
+
+  function handleBackupImport(evt) {
+    const file = evt.target.files && evt.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      let data;
+      try {
+        data = JSON.parse(reader.result);
+      } catch (e) {
+        alert('备份文件格式错误，无法导入');
+        evt.target.value = '';
+        return;
+      }
+
+      if (!data || data.app !== 'salary-book' || !Array.isArray(data.salaryRecords) || !Array.isArray(data.expenseRecords)) {
+        alert('这不是本应用的备份文件，无法导入');
+        evt.target.value = '';
+        return;
+      }
+
+      if (!confirm(`确定导入吗？将覆盖当前全部数据：\n收入 ${data.salaryRecords.length} 笔，支出 ${data.expenseRecords.length} 笔`)) {
+        evt.target.value = '';
+        return;
+      }
+
+      ratios = (data.ratios && typeof data.ratios === 'object') ? data.ratios : { ...defaultRatios };
+      tempEditRatios = { ...ratios };
+      salaryRecords = data.salaryRecords;
+      expenseRecords = data.expenseRecords;
+      editingSalaryId = null;
+      editingExpenseId = null;
+
+      saveStorage();
+      updateRatioUI();
+      resetFiltersToAll();
+      render();
+      closeBackupModal();
+      showToast('备份已恢复');
+    };
+    reader.readAsText(file);
+    evt.target.value = '';
   }
 
   function switchRemindTab(type) {
@@ -1946,7 +2095,7 @@
       editingSalaryId = null;
     } else {
       salaryRecords.unshift({
-        id: Date.now(),
+        id: genId(),
         type: 'salary',
         date,
         month,
@@ -1971,6 +2120,8 @@
     const account = document.getElementById('expenseAccount').value;
     const amount = parseFloat(document.getElementById('expenseAmount').value);
     const note = document.getElementById('expenseNote').value.trim();
+    const category = document.getElementById('expenseCategory').value;
+    const isEditing = !!editingExpenseId;
 
     if (!date || isNaN(amount) || amount <= 0) {
       alert('请输入正确的日期和支出金额');
@@ -1980,28 +2131,58 @@
     const dateParts = date.split('-');
     const month = `${dateParts[0]}-${dateParts[1]}`;
 
-    expenseRecords.unshift({
-      id: Date.now(),
-      type: 'expense',
-      date: date,
-      month: month,
-      account: account,
-      amount: amount,
-      createdAt: new Date().toISOString(),
-      note: note || '无备注'
-    });
+    if (editingExpenseId) {
+      const idx = expenseRecords.findIndex(r => r.id === editingExpenseId);
+      if (idx !== -1) {
+        expenseRecords[idx] = {
+          ...expenseRecords[idx],
+          date,
+          month,
+          account,
+          amount,
+          category,
+          createdAt: expenseRecords[idx].createdAt || new Date().toISOString(),
+          note: note || '无备注'
+        };
+      }
+      editingExpenseId = null;
+    } else {
+      expenseRecords.unshift({
+        id: genId(),
+        type: 'expense',
+        date: date,
+        month: month,
+        account: account,
+        amount: amount,
+        category: category,
+        createdAt: new Date().toISOString(),
+        note: note || '无备注'
+      });
+    }
 
     saveStorage();
     document.getElementById('expenseAmount').value = '';
     document.getElementById('expenseNote').value = '';
+    document.getElementById('expenseCategory').value = '';
     resetFiltersToAll();
     render();
-    showToast('支出记录已添加');
+    showToast(isEditing ? '支出记录已更新' : '支出记录已添加');
   }
 
-  function triggerDelete(id, type, desc) {
+  function describeRecord(id, type) {
+    if (type === 'salary') {
+      const r = salaryRecords.find(item => item.id === id);
+      if (!r) return '收入记录';
+      return `${r.date || `${r.month}-01`} ${r.incomeName || '收入'}入账 ${formatCompactMoney(Number(r.total || 0))}`;
+    }
+    const e = expenseRecords.find(item => item.id === id);
+    if (!e) return '支出记录';
+    return `${e.date} 支出 ${formatCompactMoney(Number(e.amount || 0))}`;
+  }
+
+  function triggerDelete(id, type) {
     pendingDelete = { id, type };
-    document.getElementById('modalMsgText').innerText = `确定删除【${desc}】吗？删除后余额将重新计算。`;
+    document.getElementById('modalMsgText').innerText = `确定删除【${describeRecord(id, type)}】吗？删除后余额将重新计算。`;
     document.getElementById('confirmModal').classList.add('active');
   }
 
@@ -2033,6 +2214,20 @@
     document.getElementById('salaryDate').value = r.date || `${r.month}-01`;
     document.getElementById('salaryAmount').value = r.total;
     editingSalaryId = id;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function editExpense(id) {
+    const r = expenseRecords.find(item => item.id === id);
+    if (!r) return;
+    switchPage('entry');
+    switchForm('expense');
+    document.getElementById('expenseDate').value = r.date;
+    document.getElementById('expenseAccount').value = r.account || 'life';
+    document.getElementById('expenseAmount').value = r.amount;
+    document.getElementById('expenseCategory').value = r.category || '';
+    document.getElementById('expenseNote').value = r.note === '无备注' ? '' : (r.note || '');
+    editingExpenseId = id;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -2381,10 +2576,12 @@
         const rawNote = String(record.note || '').trim();
         const hasUsefulNote = rawNote && rawNote !== '无备注';
 
-        // 优先按备注分类；没有备注时，回退到原来的账户分类
-        const key = hasUsefulNote
-          ? rawNote
-          : (accountNames[record.account] || record.account || '其他');
+        // 优先按支出分类，其次备注，最后回退到账户分类
+        const key = record.category
+          ? String(record.category)
+          : (hasUsefulNote
+            ? rawNote
+            : (accountNames[record.account] || record.account || '其他'));
 
         map.set(key, (map.get(key) || 0) + Number(record.amount || 0));
       });
@@ -2448,7 +2645,7 @@
     if (subtitle) {
       const modeText = trendViewMode === 'year' ? '年' : trendViewMode === 'month' ? '月' : '日';
       subtitle.textContent = breakdownMode === 'expense'
-        ? `${label} · 支出优先按备注分类，无备注时按账户分类`
+        ? `${label} · 支出优先按分类统计，无分类时按备注/账户归类`
         : `${label} · 收入按收入名称分类，并跟随当前${modeText}视图联动`;
     }
 
@@ -2603,13 +2800,7 @@
     const events = getUnifiedEvents();
     if (!events.length) {
       const rangeText = document.getElementById('trendRangeText');
-      const hintText = document.getElementById('trendHintText');
-      const totalIncomeAll = salaryRecords.reduce((sum, item) => sum + Number(item.total || 0), 0);
-      const totalExpenseAll = expenseRecords.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-      const totalBalanceAll = totalIncomeAll - totalExpenseAll;
-
       if (rangeText) rangeText.innerHTML = '<strong>当前范围：</strong>暂无数据';
-      if (hintText) hintText.innerHTML = `<strong>累计汇总：</strong>收入 ${formatCompactMoney(totalIncomeAll)} ｜ 支出 ${formatCompactMoney(totalExpenseAll)} ｜ 余额 ${formatCompactMoney(totalBalanceAll)}`;
       return [];
     }
 
@@ -2698,13 +2889,7 @@
     });
 
     const rangeText = document.getElementById('trendRangeText');
-    const hintText = document.getElementById('trendHintText');
-    const totalIncomeAll = salaryRecords.reduce((sum, item) => sum + Number(item.total || 0), 0);
-    const totalExpenseAll = expenseRecords.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-    const totalBalanceAll = totalIncomeAll - totalExpenseAll;
-
     if (rangeText) rangeText.innerHTML = `<strong>当前范围：</strong>${rangeLabel}`;
-    if (hintText) hintText.innerHTML = `<strong>累计汇总：</strong>收入 ${formatCompactMoney(totalIncomeAll)} ｜ 支出 ${formatCompactMoney(totalExpenseAll)} ｜ 余额 ${formatCompactMoney(totalBalanceAll)}`;
 
     return buckets;
   }
@@ -2739,15 +2924,6 @@
   }
 
 
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
   function getRecordsForDate(dateStr) {
     const income = salaryRecords
       .filter(r => (r.date || `${r.month || ''}-01`) === dateStr)
@@ -2762,7 +2938,7 @@
       .filter(r => r.date === dateStr)
       .map(r => ({
         type: 'expense',
-        label: r.note || accountNames[r.account] || '支出',
+        label: [r.category, (r.note && r.note !== '无备注') ? r.note : ''].filter(Boolean).join(' · ') || accountNames[r.account] || '支出',
         amount: Number(r.amount || 0),
         time: getExpenseEventDateTime(r)
       }));
@@ -2807,7 +2983,7 @@
           const timeText = `${pad(item.time.getHours())}:${pad(item.time.getMinutes())}`;
           const sign = item.type === 'income' ? '+' : '-';
           return `<div class="trend-detail-item">
-            <div class="left">${timeText} · ${escapeHtml(item.label)}</div>
+            <div class="left">${timeText} · ${escapeHTML(item.label)}</div>
             <div class="amount ${item.type === 'expense' ? 'out' : ''}">${sign}${formatCompactMoney(item.amount)}</div>
           </div>`;
         }).join('');
@@ -3152,6 +3328,27 @@
     document.getElementById('subInvest').innerText = `入${formatCompactMoney(totalIn.invest)} | 支${formatCompactMoney(totalOut.invest)}`;
 
     document.getElementById('balanceSummaryTotal').innerText = formatCompactMoney(netTotal);
+
+    // 本月小结
+    const monthIn = salaryRecords
+      .filter(r => (r.month || '') === currentMonthStr)
+      .reduce((sum, r) => sum + Number(r.total || 0), 0);
+    const monthOut = expenseRecords
+      .filter(r => (r.month || '') === currentMonthStr)
+      .reduce((sum, r) => sum + Number(r.amount || 0), 0);
+    const monthNet = monthIn - monthOut;
+    const monthTitleEl = document.getElementById('monthSummaryTitle');
+    const monthInEl = document.getElementById('monthSummaryIn');
+    const monthOutEl = document.getElementById('monthSummaryOut');
+    const monthNetEl = document.getElementById('monthSummaryNet');
+    if (monthTitleEl) monthTitleEl.innerText = currentMonthStr;
+    if (monthInEl) monthInEl.innerText = formatCompactMoney(monthIn);
+    if (monthOutEl) monthOutEl.innerText = formatCompactMoney(monthOut);
+    if (monthNetEl) {
+      monthNetEl.innerText = formatCompactMoney(monthNet);
+      monthNetEl.style.color = monthNet < 0 ? 'var(--expense)' : 'var(--text)';
+    }
+
     animateValueElements();
     renderTrendChart();
     renderBreakdownChart();
@@ -3223,7 +3420,7 @@
         return `
           <div class="record-item">
             <div class="record-header">
-              <span class="record-date">${r.date || `${r.month}-01`} ${r.incomeName || '工资'}入账</span>
+              <span class="record-date">${escapeHTML(r.date || `${r.month}-01`)} ${escapeHTML(r.incomeName || '工资')}入账</span>
               <span class="record-amount in">+${formatCompactMoney(Number(r.total))}</span>
             </div>
             <div class="record-tags">
@@ -3234,20 +3431,22 @@
             </div>
             <div class="record-actions">
               <button class="btn-action-edit" onclick="editSalary(${r.id})">编辑</button>
-              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'salary', '${r.date || `${r.month}-01`} ${r.incomeName || '工资'}入账')">删除</button>
+              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'salary')">删除</button>
             </div>
           </div>
         `;
       } else {
+        const catTag = r.category ? `<span style="background:#fef2f2;color:var(--expense);font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px;vertical-align:1px;">${escapeHTML(r.category)}</span>` : '';
         return `
           <div class="record-item">
             <div class="record-header">
-              <span class="record-date">${r.date} ${accountNames[r.account] || r.account}</span>
+              <span class="record-date">${escapeHTML(r.date)} ${escapeHTML(accountNames[r.account] || r.account)}${catTag}</span>
               <span class="record-amount out">-${formatCompactMoney(Number(r.amount))}</span>
             </div>
-            <div class="record-note">${r.note}</div>
+            <div class="record-note">${escapeHTML(r.note)}</div>
             <div class="record-actions">
-              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'expense', '${r.date} 支出 ${formatCompactMoney(Number(r.amount))}')">删除</button>
+              <button class="btn-action-edit" onclick="editExpense(${r.id})">编辑</button>
+              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'expense')">删除</button>
             </div>
           </div>
         `;
