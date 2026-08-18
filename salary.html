@@ -1190,7 +1190,7 @@
 
     <div class="trend-section">
       <div class="trend-header">
-        <div class="trend-title">收支联动趋势</div>
+        <div class="trend-title">收支折线</div>
         <div class="trend-legend">
           <span class="legend-item" id="legendNet"><span class="legend-line" style="background:#0f172a"></span>净资产</span>
           <span class="legend-item" id="legendIncome"><span class="legend-line" style="background:#10b981"></span>收入</span>
@@ -1235,7 +1235,7 @@
       <div class="breakdown-section">
         <div class="breakdown-head">
           <div>
-            <div class="breakdown-title">分类构成</div>
+            <div class="breakdown-title">收支分类</div>
             <div class="breakdown-subtitle" id="breakdownSubtitle">跟随当前时间范围统计；支出优先按备注分类，无备注时按账户分类</div>
           </div>
           <div class="breakdown-switcher">
@@ -2475,6 +2475,27 @@
   }
 
 
+  function formatCompactMoney(value) {
+    const num = Number(value || 0);
+    const abs = Math.abs(num);
+    const sign = num < 0 ? '-' : '';
+
+    if (abs >= 100000000) {
+      const v = abs / 100000000;
+      return `${sign}¥${v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)}亿`;
+    }
+    if (abs >= 10000) {
+      const v = abs / 10000;
+      return `${sign}¥${v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)}万`;
+    }
+    if (abs >= 1000) {
+      const v = abs / 1000;
+      return `${sign}¥${v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)}k`;
+    }
+    return `${sign}¥${abs.toFixed(2)}`;
+  }
+
+
   function getTrendSeries() {
     ensureTrendPickerValues();
     updateTrendControlUI();
@@ -2488,7 +2509,7 @@
       const totalBalanceAll = totalIncomeAll - totalExpenseAll;
 
       if (rangeText) rangeText.innerHTML = '<strong>当前范围：</strong>暂无数据';
-      if (hintText) hintText.innerHTML = `<strong>累计汇总：</strong>收入 ¥${totalIncomeAll.toFixed(2)} ｜ 支出 ¥${totalExpenseAll.toFixed(2)} ｜ 余额 ¥${totalBalanceAll.toFixed(2)}`;
+      if (hintText) hintText.innerHTML = `<strong>累计汇总：</strong>收入 ${formatCompactMoney(totalIncomeAll)} ｜ 支出 ${formatCompactMoney(totalExpenseAll)} ｜ 余额 ${formatCompactMoney(totalBalanceAll)}`;
       return [];
     }
 
@@ -2583,7 +2604,7 @@
     const totalBalanceAll = totalIncomeAll - totalExpenseAll;
 
     if (rangeText) rangeText.innerHTML = `<strong>当前范围：</strong>${rangeLabel}`;
-    if (hintText) hintText.innerHTML = `<strong>累计汇总：</strong>收入 ¥${totalIncomeAll.toFixed(2)} ｜ 支出 ¥${totalExpenseAll.toFixed(2)} ｜ 余额 ¥${totalBalanceAll.toFixed(2)}`;
+    if (hintText) hintText.innerHTML = `<strong>累计汇总：</strong>收入 ${formatCompactMoney(totalIncomeAll)} ｜ 支出 ${formatCompactMoney(totalExpenseAll)} ｜ 余额 ${formatCompactMoney(totalBalanceAll)}`;
 
     return buckets;
   }
