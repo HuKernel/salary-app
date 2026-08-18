@@ -679,6 +679,147 @@
       box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
     }
 
+
+
+    .trend-detail-card {
+      margin-top: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border-dark);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+      display: none;
+      animation: detailCardIn 0.22s ease both;
+    }
+
+    .trend-detail-card.show { display: block; }
+
+    .trend-detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .trend-detail-date {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .trend-detail-close {
+      border: 0;
+      background: #f1f5f9;
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .trend-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+
+    .trend-detail-stat {
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 8px;
+      min-width: 0;
+    }
+
+    .trend-detail-stat .k {
+      display: block;
+      color: var(--text-dim);
+      font-size: 0.66rem;
+      margin-bottom: 3px;
+    }
+
+    .trend-detail-stat .v {
+      display: block;
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .trend-detail-stat .v.expense { color: var(--expense); }
+
+    .trend-detail-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 170px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 10px;
+    }
+
+    .trend-detail-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 9px;
+      border-radius: 9px;
+      background: #fafafa;
+      font-size: 0.74rem;
+    }
+
+    .trend-detail-item .left {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+
+    .trend-detail-item .amount {
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .trend-detail-item .amount.out { color: var(--expense); }
+
+    .trend-detail-empty {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      padding: 8px 2px;
+    }
+
+    .trend-detail-action {
+      width: 100%;
+      border: 0;
+      background: var(--text);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .trend-touch-tip {
+      margin-top: 7px;
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    @keyframes detailCardIn {
+      from { opacity: 0; transform: translateY(7px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation: none !important;
@@ -838,7 +979,7 @@
 
     <div class="trend-section">
       <div class="trend-header">
-        <div class="trend-title">收支折线图</div>
+        <div class="trend-title">收支联动趋势</div>
         <div class="trend-legend">
           <span class="legend-item" id="legendNet"><span class="legend-line" style="background:#0f172a"></span>净资产</span>
           <span class="legend-item" id="legendIncome"><span class="legend-line" style="background:#10b981"></span>收入</span>
@@ -861,6 +1002,20 @@
       <div class="chart-shell">
         <canvas id="trendChart" class="trend-chart"></canvas>
         <div class="chart-empty" id="trendChartEmpty" style="display:none;">暂无趋势数据<br>先新增一笔收入或支出后，这里会自动生成折线图。</div>
+      </div>
+      <div class="trend-touch-tip" id="trendTouchTip">月视图下可点击或左右滑动折线图，查看某一天的详细收支。</div>
+      <div class="trend-detail-card" id="trendDetailCard">
+        <div class="trend-detail-head">
+          <div class="trend-detail-date" id="trendDetailDate">--</div>
+          <button class="trend-detail-close" onclick="closeTrendDetail()">×</button>
+        </div>
+        <div class="trend-detail-grid">
+          <div class="trend-detail-stat"><span class="k">收入</span><span class="v" id="trendDetailIncome">¥0.00</span></div>
+          <div class="trend-detail-stat"><span class="k">支出</span><span class="v expense" id="trendDetailExpense">¥0.00</span></div>
+          <div class="trend-detail-stat"><span class="k">净变化</span><span class="v" id="trendDetailDelta">¥0.00</span></div>
+        </div>
+        <div class="trend-detail-list" id="trendDetailList"></div>
+        <button class="trend-detail-action" onclick="drillDownTrendDay()">查看当天时间趋势 →</button>
       </div>
       <div class="trend-meta">
         <span id="trendRangeText"><strong>当前范围：</strong>--</span>
@@ -1659,6 +1814,9 @@
     if (monthPicker) monthPicker.style.display = trendViewMode === 'month' ? 'block' : 'none';
     if (datePicker) datePicker.style.display = trendViewMode === 'day' ? 'block' : 'none';
 
+    const touchTip = document.getElementById('trendTouchTip');
+    if (touchTip) touchTip.style.display = trendViewMode === 'month' ? 'block' : 'none';
+
     const subtitle = document.getElementById('trendSubtitle');
     if (subtitle) {
       if (trendViewMode === 'year') subtitle.innerText = '年视图：选择某一年后，x 轴显示 1–12 月，方便看全年收入、支出和净资产累计变化。';
@@ -1668,6 +1826,11 @@
   }
 
   function setTrendView(mode) {
+    if (mode !== 'month') {
+      selectedTrendDay = null;
+      const detailCard = document.getElementById('trendDetailCard');
+      if (detailCard) detailCard.classList.remove('show');
+    }
     trendViewMode = mode;
     localStorage.setItem('salary_trend_view_mode', mode);
     ensureTrendPickerValues();
@@ -1680,7 +1843,15 @@
     const monthPicker = document.getElementById('trendMonthPicker');
     const datePicker = document.getElementById('trendDatePicker');
     if (yearPicker) trendSelectedYear = yearPicker.value || String(now.getFullYear());
-    if (monthPicker) trendSelectedMonth = monthPicker.value || currentMonthStr;
+    if (monthPicker) {
+      const nextMonth = monthPicker.value || currentMonthStr;
+      if (nextMonth !== trendSelectedMonth) {
+        selectedTrendDay = null;
+        const detailCard = document.getElementById('trendDetailCard');
+        if (detailCard) detailCard.classList.remove('show');
+      }
+      trendSelectedMonth = nextMonth;
+    }
     if (datePicker) trendSelectedDate = datePicker.value || currentDateStr;
     renderTrendChart();
   }
@@ -1749,6 +1920,9 @@
 
   let toastTimer = null;
   let chartAnimationFrame = null;
+  let trendChartHitData = null;
+  let selectedTrendDay = null;
+  let trendPointerActive = false;
 
   function showToast(message) {
     const toast = document.getElementById('appToast');
@@ -1885,7 +2059,8 @@
     const periodIncome = buckets.reduce((sum, item) => sum + item.income, 0);
     const periodExpense = buckets.reduce((sum, item) => sum + item.expense, 0);
     if (rangeText) rangeText.innerHTML = `<strong>当前范围：</strong>${rangeLabel}`;
-    if (hintText) hintText.innerHTML = `<strong>区间汇总：</strong>收入 ¥${periodIncome.toFixed(2)} ｜ 支出 ¥${periodExpense.toFixed(2)}`;
+    const periodBalance = periodIncome - periodExpense;
+    if (hintText) hintText.innerHTML = `<strong>区间汇总：</strong>收入 ¥${periodIncome.toFixed(2)} ｜ 支出 ¥${periodExpense.toFixed(2)} ｜ 余额 ¥${periodBalance.toFixed(2)}`;
 
     return buckets;
   }
@@ -1919,7 +2094,162 @@
     });
   }
 
-  function renderTrendChart() {
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function getRecordsForDate(dateStr) {
+    const income = salaryRecords
+      .filter(r => (r.date || `${r.month || ''}-01`) === dateStr)
+      .map(r => ({
+        type: 'income',
+        label: r.incomeName || '收入',
+        amount: Number(r.total || 0),
+        time: getSalaryEventDateTime(r)
+      }));
+
+    const expense = expenseRecords
+      .filter(r => r.date === dateStr)
+      .map(r => ({
+        type: 'expense',
+        label: r.note || accountNames[r.account] || '支出',
+        amount: Number(r.amount || 0),
+        time: getExpenseEventDateTime(r)
+      }));
+
+    return income.concat(expense).sort((a, b) => a.time - b.time);
+  }
+
+  function showTrendDayDetail(index) {
+    if (trendViewMode !== 'month' || !trendChartHitData) return;
+    const { data } = trendChartHitData;
+    if (!data[index]) return;
+
+    const [year, month] = (trendSelectedMonth || currentMonthStr).split('-');
+    const day = String(index + 1).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    selectedTrendDay = dateStr;
+
+    const row = data[index];
+    const records = getRecordsForDate(dateStr);
+
+    const dateEl = document.getElementById('trendDetailDate');
+    const incomeEl = document.getElementById('trendDetailIncome');
+    const expenseEl = document.getElementById('trendDetailExpense');
+    const deltaEl = document.getElementById('trendDetailDelta');
+    const listEl = document.getElementById('trendDetailList');
+    const card = document.getElementById('trendDetailCard');
+
+    if (dateEl) dateEl.textContent = `${month}月${Number(day)}日`;
+    if (incomeEl) incomeEl.textContent = `¥${Number(row.income || 0).toFixed(2)}`;
+    if (expenseEl) expenseEl.textContent = `¥${Number(row.expense || 0).toFixed(2)}`;
+    if (deltaEl) {
+      const delta = Number(row.income || 0) - Number(row.expense || 0);
+      deltaEl.textContent = `${delta >= 0 ? '+' : '-'}¥${Math.abs(delta).toFixed(2)}`;
+      deltaEl.style.color = delta < 0 ? 'var(--expense)' : 'var(--text)';
+    }
+
+    if (listEl) {
+      if (!records.length) {
+        listEl.innerHTML = '<div class="trend-detail-empty">当天没有单独流水记录。</div>';
+      } else {
+        listEl.innerHTML = records.map(item => {
+          const timeText = `${pad(item.time.getHours())}:${pad(item.time.getMinutes())}`;
+          const sign = item.type === 'income' ? '+' : '-';
+          return `<div class="trend-detail-item">
+            <div class="left">${timeText} · ${escapeHtml(item.label)}</div>
+            <div class="amount ${item.type === 'expense' ? 'out' : ''}">${sign}¥${item.amount.toFixed(2)}</div>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    if (card) {
+      card.classList.remove('show');
+      void card.offsetWidth;
+      card.classList.add('show');
+    }
+
+    renderTrendChart(false);
+  }
+
+  function closeTrendDetail() {
+    selectedTrendDay = null;
+    const card = document.getElementById('trendDetailCard');
+    if (card) card.classList.remove('show');
+    renderTrendChart(false);
+  }
+
+  function drillDownTrendDay() {
+    if (!selectedTrendDay) return;
+    trendSelectedDate = selectedTrendDay;
+    const datePicker = document.getElementById('trendDatePicker');
+    if (datePicker) datePicker.value = selectedTrendDay;
+    setTrendView('day');
+    const card = document.getElementById('trendDetailCard');
+    if (card) card.classList.remove('show');
+    showToast(`已切换到 ${selectedTrendDay} 日视图`);
+  }
+
+  function getTrendIndexFromPointer(evt) {
+    if (!trendChartHitData || trendViewMode !== 'month') return null;
+    const canvas = document.getElementById('trendChart');
+    if (!canvas) return null;
+
+    const rect = canvas.getBoundingClientRect();
+    const clientX = evt.touches?.[0]?.clientX ?? evt.changedTouches?.[0]?.clientX ?? evt.clientX;
+    if (typeof clientX !== 'number') return null;
+
+    const x = clientX - rect.left;
+    const { paddingLeft, chartWidth, count } = trendChartHitData;
+    if (count <= 1) return 0;
+
+    const relative = Math.max(0, Math.min(chartWidth, x - paddingLeft));
+    const index = Math.round((relative / chartWidth) * (count - 1));
+    return Math.max(0, Math.min(count - 1, index));
+  }
+
+  function handleTrendPointer(evt) {
+    const index = getTrendIndexFromPointer(evt);
+    if (index === null) return;
+    showTrendDayDetail(index);
+  }
+
+  function bindTrendChartInteraction() {
+    const canvas = document.getElementById('trendChart');
+    if (!canvas || canvas.dataset.boundTrendInteraction === '1') return;
+    canvas.dataset.boundTrendInteraction = '1';
+
+    canvas.addEventListener('click', evt => handleTrendPointer(evt));
+
+    canvas.addEventListener('touchstart', evt => {
+      if (trendViewMode !== 'month') return;
+      trendPointerActive = true;
+      handleTrendPointer(evt);
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', evt => {
+      if (!trendPointerActive || trendViewMode !== 'month') return;
+      handleTrendPointer(evt);
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', () => {
+      trendPointerActive = false;
+    }, { passive: true });
+
+    canvas.addEventListener('mousemove', evt => {
+      if (evt.buttons !== 1 || trendViewMode !== 'month') return;
+      handleTrendPointer(evt);
+    });
+  }
+
+  function renderTrendChart(animateChart = true) {
     const canvas = document.getElementById('trendChart');
     const emptyEl = document.getElementById('trendChartEmpty');
     if (!canvas || !emptyEl) return;
@@ -2047,6 +2377,9 @@
     const incomePoints = hasIncome ? data.map((item, idx) => ({ x: getX(idx), y: getY(item.income) })) : [];
     const expensePoints = hasExpense ? data.map((item, idx) => ({ x: getX(idx), y: getY(item.expense) })) : [];
 
+    trendChartHitData = { data, paddingLeft: padding.left, chartWidth, count: data.length, getX, getY };
+    bindTrendChartInteraction();
+
     const drawStaticBase = () => {
       ctx.clearRect(0, 0, cssWidth, cssHeight);
 
@@ -2076,6 +2409,27 @@
         ctx.textAlign = 'center';
         ctx.fillText(item.label || '', x, cssHeight - 10);
       });
+
+      if (trendViewMode === 'month' && selectedTrendDay) {
+        const selectedIndex = Number(selectedTrendDay.slice(-2)) - 1;
+        if (selectedIndex >= 0 && selectedIndex < data.length) {
+          const markerX = getX(selectedIndex);
+          ctx.save();
+          ctx.strokeStyle = 'rgba(15, 23, 42, 0.28)';
+          ctx.setLineDash([4, 4]);
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(markerX, padding.top);
+          ctx.lineTo(markerX, padding.top + chartHeight);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.fillStyle = '#0f172a';
+          ctx.arc(markerX, padding.top + 5, 3.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
     };
 
     if (chartAnimationFrame) cancelAnimationFrame(chartAnimationFrame);
@@ -2090,7 +2444,7 @@
       if (hasExpense) drawLine(ctx, expensePoints, '#e11d48', progress, pointEvery);
     };
 
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || !animateChart) {
       paint(1);
       return;
     }
