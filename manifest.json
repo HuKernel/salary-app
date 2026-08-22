@@ -3,7 +3,7 @@
   "short_name": "记账",
   "description": "工资分配与收支记账：四账户比例分配、趋势图表、支出分类统计",
   "lang": "zh-CN",
-  "start_url": "./",
+  "start_url": "./salary.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
