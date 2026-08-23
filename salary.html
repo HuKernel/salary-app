@@ -6,6 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f8fafc">
+  <meta name="color-scheme" content="light">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1024' height='1024' rx='240' fill='%230f172a'/%3E%3Cpath d='M708 460a36 36 0 0 0 36-36 36 36 0 0 0-36-36H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v72H316a36 36 0 0 0-36 36 36 36 0 0 0 36 36h160v142.91A33.08 33.08 0 0 0 509.09 780h5.82A33.08 33.08 0 0 0 548 746.91V604h160a36 36 0 0 0 36-36 36 36 0 0 0-36-36H548v-72z' fill='%23ffffff'/%3E%3Cpath d='M511.8 388a35.33 35.33 0 0 0 25.28-10.4l72.56-72.8a35.83 35.83 0 0 0 0-50.4 35.52 35.52 0 0 0-50.23 0l-47.13 47.29-47-47.18a35.93 35.93 0 0 0-50.78 0 36.22 36.22 0 0 0 0 51l71.76 72A35.76 35.76 0 0 0 511.8 388z' fill='%23ffffff'/%3E%3C/svg%3E">
@@ -40,8 +41,13 @@
       -webkit-tap-highlight-color: transparent;
     }
     
-    body { 
-      background-color: var(--bg); 
+    html {
+      color-scheme: light;
+      background-color: var(--bg);
+    }
+
+    body {
+      background-color: var(--bg);
       color: var(--text); 
       padding: env(safe-area-inset-top, 16px) 14px calc(env(safe-area-inset-bottom, 20px) + 40px); 
       min-height: 100vh;
