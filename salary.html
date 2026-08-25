@@ -366,9 +366,9 @@
 
 
     .trend-section {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
     }
 
     .trend-header {
@@ -1249,7 +1249,6 @@
       <span class="dashboard-label">净资产总池</span>
       <span class="dashboard-total" id="balanceSummaryTotal">¥0.00</span>
     </div>
-    <div class="summary-grid">
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
           <div class="summary-title-wrap"><span class="dot life"></span><span class="label">日常生活</span></div>
@@ -1279,9 +1278,12 @@
         <div class="summary-sub" id="subInvest">入¥0 | 支¥0</div>
       </div>
     </div>
+  </section>
 
+  <!-- 月度小结 + 预算 -->
+  <section class="card page-view active" id="pageOverviewSub">
     <!-- 本月小结 -->
-    <div style="margin-top: 12px; padding: 12px; border-radius: 12px; background: #fafafa; border: 1px solid var(--border);">
+    <div style="padding: 2px 2px 0;">
       <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
         <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">月度小结</span>
         <input type="month" id="monthSummaryPicker" onchange="renderMonthSummary()"
@@ -1291,18 +1293,27 @@
         <div>
           <div style="font-size: 0.68rem; color: var(--text-dim);">收入</div>
           <div style="font-size: 0.92rem; font-weight: 800; color: #10b981; font-variant-numeric: tabular-nums;" id="monthSummaryIn">¥0.00</div>
+          <div style="font-size: 0.62rem; color: var(--text-dim); font-variant-numeric: tabular-nums;" id="monthInCompare"></div>
         </div>
         <div>
           <div style="font-size: 0.68rem; color: var(--text-dim);">支出</div>
           <div style="font-size: 0.92rem; font-weight: 800; color: var(--expense); font-variant-numeric: tabular-nums;" id="monthSummaryOut">¥0.00</div>
+          <div style="font-size: 0.62rem; color: var(--text-dim); font-variant-numeric: tabular-nums;" id="monthOutCompare"></div>
         </div>
         <div>
           <div style="font-size: 0.68rem; color: var(--text-dim);">结余</div>
           <div style="font-size: 0.92rem; font-weight: 800; font-variant-numeric: tabular-nums;" id="monthSummaryNet">¥0.00</div>
+          <div style="font-size: 0.62rem; color: var(--text-dim); font-variant-numeric: tabular-nums;" id="monthNetCompare"></div>
         </div>
       </div>
     </div>
 
+    <!-- 月度预算 -->
+    <div id="budgetSection" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);"></div>
+  </section>
+
+  <!-- 图表区 -->
+  <section class="card page-view active" id="pageOverviewCharts">
     <div class="trend-section">
       <div class="trend-header">
         <div class="trend-title">收支折线</div>
@@ -1373,13 +1384,13 @@
       <div class="trend-footnote">已优化为多时间维度查看：年视图的 x 轴是月份，月视图的 x 轴是日期，日视图的 x 轴是时间。</div>
     </div>
   </section>
-
   <!-- 录入模块 -->
   <section class="card page-view" id="pageEntry">
     <div class="page-caption">任意收入都可以自定义名称与具体入账日期，并按当前比例分配；日常消费从对应账户直接扣减。</div>
     <div class="tab-nav">
       <button class="tab-btn active" id="tabSalaryBtn" onclick="switchForm('salary')">收入入账</button>
       <button class="tab-btn" id="tabExpenseBtn" onclick="switchForm('expense')">支出扣减</button>
+      <button class="tab-btn" id="tabTransferBtn" onclick="switchForm('transfer')">账户转账</button>
     </div>
 
     <div id="salaryForm">
@@ -1451,6 +1462,9 @@
             <option value="其他">其他</option>
             <option value="__custom__">＋ 自定义分类…</option>
           </select>
+          <div style="margin-top: 5px; text-align: right;">
+            <a href="javascript:void(0)" onclick="openCategoryManageModal()" style="font-size: 0.68rem; color: var(--text-dim); text-decoration: underline dotted;">管理自定义分类</a>
+          </div>
         </div>
         <div class="input-field">
           <label>用途备注</label>
@@ -1459,16 +1473,58 @@
       </div>
       <button class="btn-main exp" onclick="addExpense()">确认支出扣减</button>
     </div>
+
+    <div id="transferForm" style="display: none;">
+      <div class="input-group">
+        <div class="input-field">
+          <label>转账日期</label>
+          <input type="date" id="transferDate">
+        </div>
+        <div class="input-field">
+          <label>转出账户</label>
+          <select id="transferFrom" onchange="updateTransferBalanceHint()">
+            <option value="life">日常生活</option>
+            <option value="save">必须存储</option>
+            <option value="fund">备用金</option>
+            <option value="invest">理财</option>
+          </select>
+          <div class="account-balance-hint" id="transferFromHint"></div>
+        </div>
+        <div class="input-field">
+          <label>转入账户</label>
+          <select id="transferTo" onchange="validateTransferAccounts()">
+            <option value="save">必须存储</option>
+            <option value="life">日常生活</option>
+            <option value="fund">备用金</option>
+            <option value="invest">理财</option>
+          </select>
+        </div>
+        <div class="input-field">
+          <label>转账金额 (¥)</label>
+          <input type="number" id="transferAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateTransferBalanceHint()">
+        </div>
+        <div class="input-field">
+          <label>备注</label>
+          <input type="text" id="transferNote" placeholder="如：发工资后挪一部分去存储">
+        </div>
+      </div>
+      <button class="btn-main" onclick="addTransfer()">确认转账</button>
+    </div>
   </section>
 
   <!-- 列表 -->
   <section class="card page-view" id="pageRecords">
     <div class="page-caption">按类型、年份和月份筛选历史收入与支出流水。</div>
+    <div class="filter-bar" style="margin-bottom: 6px;">
+      <input type="search" id="recordSearchInput" placeholder="🔍 搜索备注 / 名称 / 分类" oninput="resetRecordPageAndRender()" onsearch="resetRecordPageAndRender()"
+        style="flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-dark); font-size: 0.78rem; background: #fafafa; color: var(--text); outline: none;">
+    </div>
     <div class="filter-bar">
       <select id="listTypeFilter" onchange="resetRecordPageAndRender()">
         <option value="all">全部类型</option>
         <option value="salary">收入</option>
         <option value="expense">支出</option>
+        <option value="transfer">转账</option>
       </select>
       <select id="yearFilter" onchange="resetRecordPageAndRender()">
         <option value="all">全部年</option>
@@ -1658,6 +1714,51 @@
   </div>
 </div>
 
+<!-- 弹窗 6：通用输入（替代原生 prompt） -->
+<div class="modal-overlay" id="inputModal">
+  <div class="modal-box">
+    <div class="modal-title" id="inputModalTitle">输入</div>
+    <div class="input-group" style="margin-bottom: 14px;">
+      <div class="input-field">
+        <input type="text" id="inputModalField" placeholder="">
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-main" style="background:#f1f5f9; color:var(--text-muted); flex:1;" onclick="closeInputModal()">取消</button>
+      <button class="btn-main" style="flex:1;" onclick="confirmInputModal()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗 7：月度预算设置 -->
+<div class="modal-overlay" id="budgetModal">
+  <div class="modal-box" style="text-align: left;">
+    <div class="modal-title" style="text-align: center;">月度支出预算</div>
+    <div style="font-size: 0.74rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+      设置每月总支出的预算上限，总览页会显示进度条，超支时红色提醒。留空表示不启用。
+    </div>
+    <div class="input-group" style="margin-bottom: 14px;">
+      <div class="input-field">
+        <label>预算金额 (¥ / 月)</label>
+        <input type="number" id="budgetAmountInput" placeholder="如：3000" min="0" step="0.01" inputmode="decimal">
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-main" style="background:#f1f5f9; color:var(--text-muted); flex:1;" onclick="closeBudgetModal()">取消</button>
+      <button class="btn-main" style="flex:1;" onclick="saveBudget()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗 8：自定义分类管理 -->
+<div class="modal-overlay" id="categoryManageModal">
+  <div class="modal-box" style="text-align: left;">
+    <div class="modal-title" style="text-align: center;">自定义分类管理</div>
+    <div id="categoryManageList" style="max-height: 46vh; overflow-y: auto;"></div>
+    <button class="btn-main" style="background:#f1f5f9; color:var(--text-muted); margin-top: 14px;" onclick="closeCategoryManageModal()">关闭</button>
+  </div>
+</div>
+
 <script>
   const RATIO_STORAGE_KEY = 'salary_ratios_independent_100_v1';
 
@@ -1736,6 +1837,7 @@
   let trendSelectedDate = currentDateStr;
   document.getElementById('salaryDate').value = currentDateStr;
   document.getElementById('expenseDate').value = currentDateStr;
+  document.getElementById('transferDate').value = currentDateStr;
 
   function saveStorage() {
     localStorage.setItem(RATIO_STORAGE_KEY, JSON.stringify(ratios));
@@ -1761,11 +1863,12 @@
   function exportBackup() {
     const payload = {
       app: 'salary-book',
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       ratios,
       salaryRecords,
       expenseRecords,
+      transferRecords,
       customCategories
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
@@ -1801,7 +1904,7 @@
         return;
       }
 
-      if (!confirm(`确定导入吗？将覆盖当前全部数据：\n收入 ${data.salaryRecords.length} 笔，支出 ${data.expenseRecords.length} 笔`)) {
+      if (!confirm(`确定导入吗？将覆盖当前全部数据：\n收入 ${data.salaryRecords.length} 笔，支出 ${data.expenseRecords.length} 笔，转账 ${(data.transferRecords || []).length} 笔`)) {
         evt.target.value = '';
         return;
       }
@@ -1810,6 +1913,8 @@
       tempEditRatios = { ...ratios };
       salaryRecords = data.salaryRecords;
       expenseRecords = data.expenseRecords;
+      transferRecords = Array.isArray(data.transferRecords) ? data.transferRecords : [];
+      saveTransferStorage();
       if (Array.isArray(data.customCategories)) {
         customCategories = data.customCategories.filter(c => typeof c === 'string');
         localStorage.setItem(CUSTOM_CATEGORY_KEY, JSON.stringify(customCategories));
@@ -1999,8 +2104,8 @@
   }
 
   // 点击百分比数值直接输入，允许小数（如 12.5%）
-  function promptRatioEdit(targetKey) {
-    const input = prompt(`输入「${accountNames[targetKey]}」的比例（0-100）：`, tempEditRatios[targetKey] || 0);
+  async function promptRatioEdit(targetKey) {
+    const input = await customPrompt(`输入「${accountNames[targetKey]}」的比例`, '0 - 100，可用小数', String(tempEditRatios[targetKey] || 0));
     if (input === null) return;
     const val = parseFloat(input);
     if (isNaN(val) || val < 0 || val > 100) {
@@ -2081,6 +2186,7 @@
 
 
   function switchPage(page) {
+    const overviewCards = ['pageOverview', 'pageOverviewSub', 'pageOverviewCharts'];
     const pages = {
       overview: document.getElementById('pageOverview'),
       entry: document.getElementById('pageEntry'),
@@ -2094,6 +2200,12 @@
 
     Object.values(pages).forEach(el => el && el.classList.remove('active'));
     Object.values(navs).forEach(el => el && el.classList.remove('active'));
+
+    // 总览的三张卡片跟主卡同步显隐
+    overviewCards.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('active', page === 'overview');
+    });
 
     if (pages[page]) pages[page].classList.add('active');
     if (navs[page]) navs[page].classList.add('active');
@@ -2116,22 +2228,21 @@
   function switchForm(type) {
     const sBtn = document.getElementById('tabSalaryBtn');
     const eBtn = document.getElementById('tabExpenseBtn');
+    const tBtn = document.getElementById('tabTransferBtn');
     const sForm = document.getElementById('salaryForm');
     const eForm = document.getElementById('expenseForm');
+    const tForm = document.getElementById('transferForm');
 
-    if (type === 'salary') {
-      sBtn.className = 'tab-btn active';
-      eBtn.className = 'tab-btn';
-      sForm.style.display = 'block';
-      eForm.style.display = 'none';
-      setTimeout(() => restartAnimation(sForm, 'panel-reveal-anim', 0), 10);
-    } else {
-      sBtn.className = 'tab-btn';
-      eBtn.className = 'tab-btn active';
-      sForm.style.display = 'none';
-      eForm.style.display = 'block';
-      setTimeout(() => restartAnimation(eForm, 'panel-reveal-anim', 0), 10);
-    }
+    sBtn.className = 'tab-btn' + (type === 'salary' ? ' active' : '');
+    eBtn.className = 'tab-btn' + (type === 'expense' ? ' active' : '');
+    if (tBtn) tBtn.className = 'tab-btn' + (type === 'transfer' ? ' active' : '');
+    sForm.style.display = type === 'salary' ? 'block' : 'none';
+    eForm.style.display = type === 'expense' ? 'block' : 'none';
+    if (tForm) tForm.style.display = type === 'transfer' ? 'block' : 'none';
+
+    const targetForm = type === 'salary' ? sForm : type === 'expense' ? eForm : tForm;
+    if (targetForm) setTimeout(() => restartAnimation(targetForm, 'panel-reveal-anim', 0), 10);
+    if (type === 'transfer') updateTransferBalanceHint();
   }
 
   function resetFiltersToAll() {
@@ -2151,6 +2262,11 @@
   function refreshCategoryOptions() {
     const select = document.getElementById('expenseCategory');
     if (!select) return;
+    // 自定义 option = 非基础、非 __custom__、非空；不在最新列表里的移除（处理删除分类后的残留）
+    select.querySelectorAll('option').forEach(opt => {
+      if (!opt.value || opt.value === '__custom__' || baseCategories.includes(opt.value)) return;
+      if (!customCategories.includes(opt.value)) opt.remove();
+    });
     const customOpt = select.querySelector('option[value="__custom__"]');
     customCategories.forEach(name => {
       if (select.querySelector(`option[value="${CSS.escape(name)}"]`)) return;
@@ -2159,13 +2275,237 @@
       opt.innerText = name;
       select.insertBefore(opt, customOpt);
     });
+    // 当前选中值可能刚被删除，回退到"不分类"
+    if (select.value !== '__custom__' && !select.querySelector(`option[value="${CSS.escape(select.value)}"]`)) {
+      select.value = '';
+    }
   }
 
-  function handleCategoryChange() {
+  /* ===== 通用输入弹窗（替代原生 prompt） ===== */
+  let inputModalResolve = null;
+
+  function customPrompt(title, placeholder, defaultValue = '') {
+    return new Promise(resolve => {
+      inputModalResolve = resolve;
+      document.getElementById('inputModalTitle').textContent = title;
+      const field = document.getElementById('inputModalField');
+      field.placeholder = placeholder;
+      field.value = defaultValue;
+      document.getElementById('inputModal').classList.add('active');
+      setTimeout(() => { field.focus(); field.select(); }, 50);
+    });
+  }
+
+  function closeInputModal() {
+    document.getElementById('inputModal').classList.remove('active');
+    if (inputModalResolve) { inputModalResolve(null); inputModalResolve = null; }
+  }
+
+  function confirmInputModal() {
+    const val = document.getElementById('inputModalField').value;
+    document.getElementById('inputModal').classList.remove('active');
+    if (inputModalResolve) { inputModalResolve(val); inputModalResolve = null; }
+  }
+
+  // Enter 提交输入弹窗
+  document.getElementById('inputModalField').addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmInputModal();
+  });
+
+  /* ===== 账户间转账 ===== */
+  let transferRecords = safeParse(localStorage.getItem('transfer_records'), []);
+  if (!Array.isArray(transferRecords)) transferRecords = [];
+
+  function saveTransferStorage() {
+    localStorage.setItem('transfer_records', JSON.stringify(transferRecords));
+  }
+
+  function updateTransferBalanceHint() {
+    const hintEl = document.getElementById('transferFromHint');
+    if (!hintEl) return;
+    const from = document.getElementById('transferFrom')?.value || 'life';
+    const bal = getAccountBalance(from);
+    const amount = parseFloat(document.getElementById('transferAmount').value) || 0;
+    const overdraft = amount > 0 && amount > bal;
+    hintEl.textContent = `当前余额 ${formatCompactMoney(bal)}${overdraft ? ` · 本次将透支 ${formatCompactMoney(amount - bal)}` : ''}`;
+    hintEl.classList.toggle('warn', overdraft);
+  }
+
+  function validateTransferAccounts() {
+    const from = document.getElementById('transferFrom').value;
+    const to = document.getElementById('transferTo').value;
+    if (from === to) {
+      showToast('转出和转入账户不能相同');
+      // 自动换一个不同的转入账户
+      const alt = orderKeys.find(k => k !== from);
+      if (alt) document.getElementById('transferTo').value = alt;
+    }
+    updateTransferBalanceHint();
+  }
+
+  async function addTransfer() {
+    const date = document.getElementById('transferDate').value;
+    const from = document.getElementById('transferFrom').value;
+    const to = document.getElementById('transferTo').value;
+    const amount = parseFloat(document.getElementById('transferAmount').value);
+    const note = document.getElementById('transferNote').value.trim();
+
+    if (!date || isNaN(amount) || amount <= 0) {
+      alert('请输入正确的日期和转账金额');
+      return;
+    }
+    if (from === to) {
+      showToast('转出和转入账户不能相同');
+      return;
+    }
+
+    const balance = getAccountBalance(from);
+    if (amount > balance && !confirm(`「${accountNames[from]}」当前余额 ${formatCompactMoney(balance)}，本次转账 ${formatCompactMoney(amount)} 将透支，确定继续吗？`)) {
+      return;
+    }
+
+    const month = date.slice(0, 7);
+    transferRecords.unshift({
+      id: genId(),
+      type: 'transfer',
+      date,
+      month,
+      from,
+      to,
+      amount,
+      note: note || '无备注',
+      createdAt: new Date().toISOString()
+    });
+
+    saveTransferStorage();
+    document.getElementById('transferAmount').value = '';
+    document.getElementById('transferNote').value = '';
+    document.getElementById('transferDate').value = currentDateStr;
+    resetFiltersToAll();
+    render();
+    updateTransferBalanceHint();
+    showToast('转账成功');
+  }
+
+  /* ===== 月度预算 ===== */
+  function getBudget() {
+    const val = parseFloat(localStorage.getItem('monthly_budget'));
+    return isNaN(val) || val <= 0 ? null : val;
+  }
+
+  function openBudgetModal() {
+    const input = document.getElementById('budgetAmountInput');
+    input.value = getBudget() || '';
+    document.getElementById('budgetModal').classList.add('active');
+  }
+
+  function closeBudgetModal() {
+    document.getElementById('budgetModal').classList.remove('active');
+  }
+
+  function saveBudget() {
+    const raw = document.getElementById('budgetAmountInput').value;
+    if (raw === '') {
+      localStorage.removeItem('monthly_budget');
+      showToast('已关闭月度预算');
+    } else {
+      const val = parseFloat(raw);
+      if (isNaN(val) || val <= 0) {
+        showToast('请输入大于 0 的金额');
+        return;
+      }
+      localStorage.setItem('monthly_budget', String(val));
+      showToast('预算已保存');
+    }
+    closeBudgetModal();
+    renderBudgetSection();
+  }
+
+  function renderBudgetSection() {
+    const section = document.getElementById('budgetSection');
+    if (!section) return;
+    const budget = getBudget();
+    if (!budget) {
+      section.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">月度预算</div>
+            <div style="font-size:0.7rem; color:var(--text-dim); margin-top:2px;">设置每月支出上限，控制开销</div>
+          </div>
+          <button class="btn-action-edit" onclick="openBudgetModal()">去设置</button>
+        </div>`;
+      return;
+    }
+
+    const month = (document.getElementById('monthSummaryPicker')?.value) || currentMonthStr;
+    const spent = expenseRecords.filter(r => r.month === month).reduce((s, r) => s + Number(r.amount || 0), 0);
+    const pct = Math.min(100, spent / budget * 100);
+    const over = spent > budget;
+    const barColor = over ? 'var(--expense)' : pct >= 80 ? '#f59e0b' : '#10b981';
+
+    section.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">月度预算 <span style="font-weight:600; color:var(--text-dim); font-size:0.7rem;">${month}</span></div>
+        <button class="btn-action-edit" onclick="openBudgetModal()">修改</button>
+      </div>
+      <div style="background:#f1f5f9; border-radius:999px; height:10px; overflow:hidden;">
+        <div style="width:${pct}%; height:100%; background:${barColor}; border-radius:999px; transition: width 0.4s ease;"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:0.72rem; font-variant-numeric:tabular-nums; ${over ? 'color:var(--expense); font-weight:700;' : 'color:var(--text-dim);'}">
+        <span>已支出 ${formatCompactMoney(spent)}</span>
+        <span>${over ? `已超支 ${formatCompactMoney(spent - budget)}` : `剩余 ${formatCompactMoney(budget - spent)}`} / 预算 ${formatCompactMoney(budget)}</span>
+      </div>`;
+  }
+
+  /* ===== 自定义分类管理 ===== */
+  function openCategoryManageModal() {
+    renderCategoryManageList();
+    document.getElementById('categoryManageModal').classList.add('active');
+  }
+
+  function closeCategoryManageModal() {
+    document.getElementById('categoryManageModal').classList.remove('active');
+  }
+
+  function renderCategoryManageList() {
+    const listEl = document.getElementById('categoryManageList');
+    if (!listEl) return;
+    if (!customCategories.length) {
+      listEl.innerHTML = '<div style="font-size:0.76rem; color:var(--text-dim); padding:16px 0; text-align:center;">还没有自定义分类</div>';
+      return;
+    }
+    const usageCount = name => expenseRecords.filter(r => r.category === name).length;
+    listEl.innerHTML = customCategories.map(name => {
+      const used = usageCount(name);
+      return `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 2px; border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:0.84rem; font-weight:600;">${escapeHTML(name)}</div>
+            <div style="font-size:0.68rem; color:var(--text-dim); margin-top:1px;">已被 ${used} 笔支出使用</div>
+          </div>
+          <button class="btn-action-del" onclick="deleteCustomCategory('${escapeHTML(name)}')">删除</button>
+        </div>`;
+    }).join('');
+  }
+
+  function deleteCustomCategory(name) {
+    const used = expenseRecords.filter(r => r.category === name).length;
+    if (used > 0 && !confirm(`「${name}」已被 ${used} 笔支出使用，删除后这些记录将变为"不分类"。确定删除吗？`)) {
+      return;
+    }
+    customCategories = customCategories.filter(c => c !== name);
+    localStorage.setItem(CUSTOM_CATEGORY_KEY, JSON.stringify(customCategories));
+    refreshCategoryOptions();
+    renderCategoryManageList();
+    render();
+    showToast(`已删除分类「${name}」`);
+  }
+
+  async function handleCategoryChange() {
     const select = document.getElementById('expenseCategory');
     if (select.value !== '__custom__') return;
 
-    const name = prompt('输入自定义分类名称（如：买key）：');
+    const name = await customPrompt('新建自定义分类', '输入分类名称（如：买key）');
     if (!name || !name.trim()) {
       select.value = '';
       return;
@@ -2298,6 +2638,10 @@
     let bal = 0;
     salaryRecords.forEach(r => { bal += (r[key] || 0); });
     expenseRecords.forEach(e => { if (e.account === key) bal -= (e.amount || 0); });
+    transferRecords.forEach(t => {
+      if (t.from === key) bal -= (t.amount || 0);
+      if (t.to === key) bal += (t.amount || 0);
+    });
     return bal;
   }
 
@@ -2378,6 +2722,11 @@
       if (!r) return '收入记录';
       return `${r.date || `${r.month}-01`} ${r.incomeName || '收入'}入账 ${formatCompactMoney(Number(r.total || 0))}`;
     }
+    if (type === 'transfer') {
+      const t = transferRecords.find(item => item.id === id);
+      if (!t) return '转账记录';
+      return `${t.date} ${accountNames[t.from] || t.from} → ${accountNames[t.to] || t.to} ${formatCompactMoney(Number(t.amount || 0))}`;
+    }
     const e = expenseRecords.find(item => item.id === id);
     if (!e) return '支出记录';
     return `${e.date} 支出 ${formatCompactMoney(Number(e.amount || 0))}`;
@@ -2399,13 +2748,16 @@
     const { id, type } = pendingDelete;
     if (type === 'salary') {
       salaryRecords = salaryRecords.filter(r => r.id !== id);
+    } else if (type === 'transfer') {
+      transferRecords = transferRecords.filter(r => r.id !== id);
+      saveTransferStorage();
     } else {
       expenseRecords = expenseRecords.filter(r => r.id !== id);
     }
     saveStorage();
     closeDeleteModal();
     render();
-    showToast(type === 'salary' ? '收入记录已删除' : '支出记录已删除');
+    showToast(type === 'salary' ? '收入记录已删除' : type === 'transfer' ? '转账记录已删除' : '支出记录已删除');
   });
 
   function editSalary(id) {
@@ -3586,6 +3938,27 @@
       .reduce((sum, r) => sum + Number(r.amount || 0), 0);
     const monthNet = monthIn - monthOut;
 
+    // 环比：与上一个月份对比
+    const [y, m] = month.split('-').map(Number);
+    const prevMonth = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`;
+    const prevIn = salaryRecords
+      .filter(r => (r.month || '') === prevMonth)
+      .reduce((sum, r) => sum + Number(r.total || 0), 0);
+    const prevOut = expenseRecords
+      .filter(r => (r.month || '') === prevMonth)
+      .reduce((sum, r) => sum + Number(r.amount || 0), 0);
+    const prevNet = prevIn - prevOut;
+
+    const compareText = (cur, prev, goodWhenDown) => {
+      const hasPrev = prevIn + prevOut > 0;
+      if (!hasPrev) return '';
+      if (prev === 0) return cur > 0 ? '↑ 新增' : '';
+      const diff = cur - prev;
+      const pct = Math.round(Math.abs(diff) / Math.abs(prev) * 100);
+      const arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
+      return `${arrow} ${pct}% 环比`;
+    };
+
     const inEl = document.getElementById('monthSummaryIn');
     const outEl = document.getElementById('monthSummaryOut');
     const netEl = document.getElementById('monthSummaryNet');
@@ -3595,6 +3968,17 @@
       netEl.innerText = formatCompactMoney(monthNet);
       netEl.style.color = monthNet < 0 ? 'var(--expense)' : 'var(--text)';
     }
+
+    // 环比小字（上月无任何记录时不显示）
+    const hasPrevData = prevIn + prevOut > 0;
+    const cmpIn = document.getElementById('monthInCompare');
+    const cmpOut = document.getElementById('monthOutCompare');
+    const cmpNet = document.getElementById('monthNetCompare');
+    if (cmpIn) cmpIn.textContent = hasPrevData ? compareText(monthIn, prevIn, false) : '';
+    if (cmpOut) cmpOut.textContent = hasPrevData ? compareText(monthOut, prevOut, true) : '';
+    if (cmpNet) cmpNet.textContent = hasPrevData ? compareText(monthNet, prevNet, false) : '';
+
+    renderBudgetSection();
   }
 
   function render() {
@@ -3616,10 +4000,17 @@
       }
     });
 
-    const netLife = totalIn.life - totalOut.life;
-    const netSave = totalIn.save - totalOut.save;
-    const netFund = totalIn.fund - totalOut.fund;
-    const netInvest = totalIn.invest - totalOut.invest;
+    // 转账只改账户净额（净额 = 入 - 支 + 转入 - 转出），不并入"入/支"汇总避免负数歧义
+    const netAdjust = { life: 0, save: 0, fund: 0, invest: 0 };
+    transferRecords.forEach(t => {
+      if (netAdjust[t.from] !== undefined) netAdjust[t.from] -= (t.amount || 0);
+      if (netAdjust[t.to] !== undefined) netAdjust[t.to] += (t.amount || 0);
+    });
+
+    const netLife = totalIn.life - totalOut.life + netAdjust.life;
+    const netSave = totalIn.save - totalOut.save + netAdjust.save;
+    const netFund = totalIn.fund - totalOut.fund + netAdjust.fund;
+    const netInvest = totalIn.invest - totalOut.invest + netAdjust.invest;
     const netTotal = netLife + netSave + netFund + netInvest;
 
     document.getElementById('balLife').innerText = formatCompactMoney(netLife);
@@ -3642,11 +4033,14 @@
     renderTrendChart();
     renderBreakdownChart();
     updateAccountBalanceHint();
+    renderBudgetSection();
 
     const yearFilter = document.getElementById('yearFilter').value;
     const monthFilter = document.getElementById('monthFilter').value;
     const typeFilter = document.getElementById('listTypeFilter').value;
     const categoryFilter = document.getElementById('categoryFilter').value;
+    const searchInput = document.getElementById('recordSearchInput');
+    const keyword = (searchInput?.value || '').trim().toLowerCase();
 
     let combined = [];
     if (typeFilter === 'all' || typeFilter === 'salary') {
@@ -3655,10 +4049,24 @@
     if (typeFilter === 'all' || typeFilter === 'expense') {
       combined = combined.concat(expenseRecords);
     }
+    if (typeFilter === 'all' || typeFilter === 'transfer') {
+      combined = combined.concat(transferRecords);
+    }
 
     // 选中具体分类时，只保留该分类的支出记录
     if (categoryFilter !== 'all') {
       combined = combined.filter(r => r.type === 'expense' && r.category === categoryFilter);
+    }
+
+    // 关键字搜索：匹配收入名称 / 支出备注 / 分类 / 转账备注
+    if (keyword) {
+      combined = combined.filter(r => {
+        const haystack = [
+          r.incomeName, r.note, r.category,
+          r.type === 'transfer' ? `${accountNames[r.from] || ''}→${accountNames[r.to] || ''}` : ''
+        ].filter(Boolean).join(' ').toLowerCase();
+        return haystack.includes(keyword);
+      });
     }
 
     combined.sort((a, b) => {
@@ -3728,6 +4136,19 @@
             <div class="record-actions">
               <button class="btn-action-edit" onclick="editSalary(${r.id})">编辑</button>
               <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'salary')">删除</button>
+            </div>
+          </div>
+        `;
+      } else if (r.type === 'transfer') {
+        return `
+          <div class="record-item">
+            <div class="record-header">
+              <span class="record-date">${escapeHTML(r.date)} ${escapeHTML(accountNames[r.from] || r.from)} → ${escapeHTML(accountNames[r.to] || r.to)}</span>
+              <span class="record-amount" style="color: #8b5cf6;">${formatCompactMoney(Number(r.amount))}</span>
+            </div>
+            <div class="record-note" style="color: var(--text-dim);">${escapeHTML(r.note)}</div>
+            <div class="record-actions">
+              <button class="btn-action-del" onclick="triggerDelete(${r.id}, 'transfer')">删除</button>
             </div>
           </div>
         `;
