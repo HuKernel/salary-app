@@ -341,7 +341,34 @@
       width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-dark); background: #ffffff; font-weight: 700; font-size: 1.1rem; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
     .step-btn:active { background: #f1f5f9; }
-    .step-val { width: 44px; text-align: center; font-weight: 700; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+    .step-val { width: 44px; text-align: center; font-weight: 700; font-size: 0.95rem; font-variant-numeric: tabular-nums; cursor: pointer; text-decoration: underline dotted rgba(148,163,184,0.7); text-underline-offset: 3px; }
+
+    /* 收入分配方式切换 + 手动指定金额 */
+    .alloc-switcher { display: flex; gap: 3px; background: #f1f5f9; border-radius: 10px; padding: 3px; }
+    .alloc-switch-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 8px 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+    .alloc-switch-btn.active { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(15,23,42,0.07); }
+    .custom-alloc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .custom-alloc-sum {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 8px; padding: 8px 10px;
+      background: #f8fafc; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 0.78rem; font-weight: 700; color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .account-balance-hint { margin-top: 6px; font-size: 0.72rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+    .account-balance-hint.warn { color: var(--expense); font-weight: 700; }
 
 
     .trend-section {
@@ -1375,12 +1402,28 @@
           <label>入账日期</label>
           <input type="date" id="salaryDate">
         </div>
-        <div class="input-field">
+        <div class="input-field" id="salaryAmountField">
           <label>入账金额 (¥)</label>
           <input type="number" id="salaryAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
         </div>
+        <div class="input-field">
+          <label>分配方式</label>
+          <div class="alloc-switcher">
+            <button type="button" class="alloc-switch-btn active" id="allocModeRatioBtn" onclick="setAllocMode('ratio')">按配比自动分配</button>
+            <button type="button" class="alloc-switch-btn" id="allocModeCustomBtn" onclick="setAllocMode('custom')">手动指定金额</button>
+          </div>
+        </div>
+        <div id="customAllocWrap" style="display:none;">
+          <div class="custom-alloc-grid">
+            <div class="input-field"><label>日常生活 (¥)</label><input type="number" id="allocLife" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateCustomAllocSum()"></div>
+            <div class="input-field"><label>必须存储 (¥)</label><input type="number" id="allocSave" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateCustomAllocSum()"></div>
+            <div class="input-field"><label>备用金 (¥)</label><input type="number" id="allocFund" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateCustomAllocSum()"></div>
+            <div class="input-field"><label>理财 (¥)</label><input type="number" id="allocInvest" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateCustomAllocSum()"></div>
+          </div>
+          <div class="custom-alloc-sum"><span>合计入账</span><span id="customAllocSum">¥0.00</span></div>
+        </div>
       </div>
-      <button class="btn-main" onclick="addOrUpdateSalary()">按当前比例分配入账</button>
+      <button class="btn-main" id="salarySubmitBtn" onclick="addOrUpdateSalary()">按当前比例分配入账</button>
     </div>
 
     <div id="expenseForm" style="display: none;">
@@ -1391,16 +1434,17 @@
         </div>
         <div class="input-field">
           <label>支出账户</label>
-          <select id="expenseAccount">
+          <select id="expenseAccount" onchange="updateAccountBalanceHint()">
             <option value="life" id="opt-life">日常生活</option>
             <option value="save" id="opt-save">必须存储</option>
             <option value="fund" id="opt-fund">备用金</option>
             <option value="invest" id="opt-invest">理财</option>
           </select>
+          <div class="account-balance-hint" id="accountBalanceHint"></div>
         </div>
         <div class="input-field">
           <label>支出金额 (¥)</label>
-          <input type="number" id="expenseAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+          <input type="number" id="expenseAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateAccountBalanceHint()">
         </div>
         <div class="input-field">
           <label>支出分类</label>
@@ -1540,7 +1584,7 @@
       <span>日常生活</span>
       <div class="ratio-stepper">
         <button class="step-btn" onclick="stepSingleEdit('life', -5)">-</button>
-        <span class="step-val" id="mVal-life">40%</span>
+        <span class="step-val" id="mVal-life" title="点击直接输入比例" onclick="promptRatioEdit('life')">40%</span>
         <button class="step-btn" onclick="stepSingleEdit('life', 5)">+</button>
       </div>
     </div>
@@ -1549,7 +1593,7 @@
       <span>必须存储</span>
       <div class="ratio-stepper">
         <button class="step-btn" onclick="stepSingleEdit('save', -5)">-</button>
-        <span class="step-val" id="mVal-save">30%</span>
+        <span class="step-val" id="mVal-save" title="点击直接输入比例" onclick="promptRatioEdit('save')">30%</span>
         <button class="step-btn" onclick="stepSingleEdit('save', 5)">+</button>
       </div>
     </div>
@@ -1558,7 +1602,7 @@
       <span>备用金</span>
       <div class="ratio-stepper">
         <button class="step-btn" onclick="stepSingleEdit('fund', -5)">-</button>
-        <span class="step-val" id="mVal-fund">20%</span>
+        <span class="step-val" id="mVal-fund" title="点击直接输入比例" onclick="promptRatioEdit('fund')">20%</span>
         <button class="step-btn" onclick="stepSingleEdit('fund', 5)">+</button>
       </div>
     </div>
@@ -1567,7 +1611,7 @@
       <span>理财</span>
       <div class="ratio-stepper">
         <button class="step-btn" onclick="stepSingleEdit('invest', -5)">-</button>
-        <span class="step-val" id="mVal-invest">10%</span>
+        <span class="step-val" id="mVal-invest" title="点击直接输入比例" onclick="promptRatioEdit('invest')">10%</span>
         <button class="step-btn" onclick="stepSingleEdit('invest', 5)">+</button>
       </div>
     </div>
@@ -1963,12 +2007,26 @@
     updateModalDisplay();
   }
 
+  // 点击百分比数值直接输入，允许小数（如 12.5%）
+  function promptRatioEdit(targetKey) {
+    const input = prompt(`输入「${accountNames[targetKey]}」的比例（0-100）：`, tempEditRatios[targetKey] || 0);
+    if (input === null) return;
+    const val = parseFloat(input);
+    if (isNaN(val) || val < 0 || val > 100) {
+      showToast('请输入 0-100 之间的数字');
+      return;
+    }
+    tempEditRatios[targetKey] = Math.round(val * 10) / 10;
+    updateModalDisplay();
+  }
+
   function updateModalDisplay() {
     let sum = 0;
     orderKeys.forEach(k => {
       document.getElementById(`mVal-${k}`).innerText = `${tempEditRatios[k]}%`;
       sum += (tempEditRatios[k] || 0);
     });
+    sum = Math.round(sum * 10) / 10;
 
     const sumDisplay = document.getElementById('modalSumDisplay');
     const sumTip = document.getElementById('modalSumTip');
@@ -2000,15 +2058,18 @@
   function saveAndApplyRatios() {
     ratios = { ...tempEditRatios };
 
-    // 重新按 100% 最新比例重算历史每笔收入的分配金额
-    salaryRecords = salaryRecords.map(r => ({
-      ...r,
-      life: r.total * ((ratios.life || 0) / 100),
-      save: r.total * ((ratios.save || 0) / 100),
-      fund: r.total * ((ratios.fund || 0) / 100),
-      invest: r.total * ((ratios.invest || 0) / 100),
-      ratioSnapshot: { ...ratios }
-    }));
+    // 重新按 100% 最新比例重算历史每笔收入的分配金额（手动指定金额的记录除外）
+    salaryRecords = salaryRecords.map(r => {
+      if (r.customAlloc) return r;
+      return {
+        ...r,
+        life: r.total * ((ratios.life || 0) / 100),
+        save: r.total * ((ratios.save || 0) / 100),
+        fund: r.total * ((ratios.fund || 0) / 100),
+        invest: r.total * ((ratios.invest || 0) / 100),
+        ratioSnapshot: { ...ratios }
+      };
+    });
 
     saveStorage();
     updateRatioUI();
@@ -2127,26 +2188,78 @@
 
   refreshCategoryOptions();
 
+  /* ===== 收入分配：按配比 或 手动指定各分类金额 ===== */
+  let allocMode = 'ratio';
+  const allocInputKeys = { life: 'allocLife', save: 'allocSave', fund: 'allocFund', invest: 'allocInvest' };
+
+  function setAllocMode(mode) {
+    allocMode = mode === 'custom' ? 'custom' : 'ratio';
+    const isCustom = allocMode === 'custom';
+    document.getElementById('allocModeRatioBtn').classList.toggle('active', !isCustom);
+    document.getElementById('allocModeCustomBtn').classList.toggle('active', isCustom);
+    document.getElementById('salaryAmountField').style.display = isCustom ? 'none' : 'block';
+    document.getElementById('customAllocWrap').style.display = isCustom ? 'block' : 'none';
+    document.getElementById('salarySubmitBtn').textContent = isCustom ? '按指定金额入账' : '按当前比例分配入账';
+
+    // 切到手动模式且四项为空时，按当前配比预填一次，方便直接微调
+    if (isCustom && orderKeys.every(k => !document.getElementById(allocInputKeys[k]).value)) {
+      const total = parseFloat(document.getElementById('salaryAmount').value) || 0;
+      orderKeys.forEach(k => {
+        document.getElementById(allocInputKeys[k]).value = total > 0 ? (total * (ratios[k] || 0) / 100).toFixed(2) : '';
+      });
+    }
+    updateCustomAllocSum();
+  }
+
+  function updateCustomAllocSum() {
+    const sumEl = document.getElementById('customAllocSum');
+    if (!sumEl) return;
+    const sum = orderKeys.reduce((s, k) => s + (parseFloat(document.getElementById(allocInputKeys[k]).value) || 0), 0);
+    sumEl.textContent = formatCompactMoney(sum);
+  }
+
   function addOrUpdateSalary() {
     const incomeName = document.getElementById('incomeName').value.trim() || '收入';
     const date = document.getElementById('salaryDate').value;
-    const amount = parseFloat(document.getElementById('salaryAmount').value);
     const isEditing = !!editingSalaryId;
 
-    if (!date || isNaN(amount) || amount <= 0) {
-      alert('请输入正确的入账日期与金额');
-      return;
+    let amount;
+    let alloc;
+
+    if (allocMode === 'custom') {
+      const parts = {};
+      orderKeys.forEach(k => {
+        parts[k] = Math.round((parseFloat(document.getElementById(allocInputKeys[k]).value) || 0) * 100) / 100;
+      });
+      amount = Math.round(orderKeys.reduce((sum, k) => sum + parts[k], 0) * 100) / 100;
+      if (!date || isNaN(amount) || amount <= 0) {
+        alert('请填写入账日期，且四个分类金额合计需大于 0');
+        return;
+      }
+      // 手动分配：比例快照按实际金额反算，仅用于流水展示
+      const pct = v => Math.round((v / amount) * 1000) / 10;
+      alloc = {
+        ...parts,
+        ratioSnapshot: { life: pct(parts.life), save: pct(parts.save), fund: pct(parts.fund), invest: pct(parts.invest) },
+        customAlloc: true
+      };
+    } else {
+      amount = parseFloat(document.getElementById('salaryAmount').value);
+      if (!date || isNaN(amount) || amount <= 0) {
+        alert('请输入正确的入账日期与金额');
+        return;
+      }
+      alloc = {
+        life: amount * (ratios.life / 100),
+        save: amount * (ratios.save / 100),
+        fund: amount * (ratios.fund / 100),
+        invest: amount * (ratios.invest / 100),
+        ratioSnapshot: { ...ratios },
+        customAlloc: false
+      };
     }
 
     const month = date.slice(0, 7);
-
-    const alloc = {
-      life: amount * (ratios.life / 100),
-      save: amount * (ratios.save / 100),
-      fund: amount * (ratios.fund / 100),
-      invest: amount * (ratios.invest / 100),
-      ratioSnapshot: { ...ratios }
-    };
 
     if (editingSalaryId) {
       const idx = salaryRecords.findIndex(r => r.id === editingSalaryId);
@@ -2178,10 +2291,31 @@
     saveStorage();
     document.getElementById('incomeName').value = '';
     document.getElementById('salaryAmount').value = '';
+    orderKeys.forEach(k => { document.getElementById(allocInputKeys[k]).value = ''; });
     document.getElementById('salaryDate').value = currentDateStr;
+    if (allocMode === 'custom') updateCustomAllocSum();
     resetFiltersToAll();
     render();
     showToast(isEditing ? '收入记录已更新' : '收入已成功入账');
+  }
+
+  /* ===== 支出表单：显示所选账户余额与透支提醒 ===== */
+  function getAccountBalance(key) {
+    let bal = 0;
+    salaryRecords.forEach(r => { bal += (r[key] || 0); });
+    expenseRecords.forEach(e => { if (e.account === key) bal -= (e.amount || 0); });
+    return bal;
+  }
+
+  function updateAccountBalanceHint() {
+    const hintEl = document.getElementById('accountBalanceHint');
+    if (!hintEl) return;
+    const account = document.getElementById('expenseAccount')?.value || 'life';
+    const bal = getAccountBalance(account);
+    const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
+    const overdraft = amount > 0 && amount > bal;
+    hintEl.textContent = `当前余额 ${formatCompactMoney(bal)}${overdraft ? ` · 本次将透支 ${formatCompactMoney(amount - bal)}` : ''}`;
+    hintEl.classList.toggle('warn', overdraft);
   }
 
   function addExpense() {
@@ -2194,6 +2328,12 @@
 
     if (!date || isNaN(amount) || amount <= 0) {
       alert('请输入正确的日期和支出金额');
+      return;
+    }
+
+    // 余额不足以覆盖本次支出时给出确认，避免误扣成负数
+    const balance = getAccountBalance(account);
+    if (amount > balance && !confirm(`「${accountNames[account]}」当前余额 ${formatCompactMoney(balance)}，本次支出 ${formatCompactMoney(amount)} 将透支 ${formatCompactMoney(amount - balance)}，确定继续吗？`)) {
       return;
     }
 
@@ -2279,9 +2419,12 @@
     if (!r) return;
     switchPage('entry');
     switchForm('salary');
+    setAllocMode(r.customAlloc ? 'custom' : 'ratio');
     document.getElementById('incomeName').value = r.incomeName || '工资';
     document.getElementById('salaryDate').value = r.date || `${r.month}-01`;
     document.getElementById('salaryAmount').value = r.total;
+    orderKeys.forEach(k => { document.getElementById(allocInputKeys[k]).value = r[k] != null ? r[k] : ''; });
+    if (r.customAlloc) updateCustomAllocSum();
     editingSalaryId = id;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -2291,7 +2434,10 @@
     if (!r) return;
     // 记录里的分类可能还没出现在下拉里（如导入的备份），先补进去
     if (r.category && !document.querySelector(`#expenseCategory option[value="${CSS.escape(r.category)}"]`)) {
-      customCategories.push(r.category);
+      if (!customCategories.includes(r.category) && !baseCategories.includes(r.category)) {
+        customCategories.push(r.category);
+        localStorage.setItem(CUSTOM_CATEGORY_KEY, JSON.stringify(customCategories));
+      }
       refreshCategoryOptions();
     }
     switchPage('entry');
@@ -3501,6 +3647,7 @@
     animateValueElements();
     renderTrendChart();
     renderBreakdownChart();
+    updateAccountBalanceHint();
 
     const yearFilter = document.getElementById('yearFilter').value;
     const monthFilter = document.getElementById('monthFilter').value;
