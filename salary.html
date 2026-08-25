@@ -129,12 +129,6 @@
     .dot.invest { background: var(--dot-invest); }
     
     .summary-item .label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
-    .ratio-tag {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--text-dim);
-      font-variant-numeric: tabular-nums;
-    }
 
     .summary-item .val { 
       font-size: 1.12rem; 
@@ -1259,7 +1253,6 @@
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
           <div class="summary-title-wrap"><span class="dot life"></span><span class="label">日常生活</span></div>
-          <span class="ratio-tag" id="summaryLabel-life">40%</span>
         </div>
         <div class="val" id="balLife">¥0.00</div>
         <div class="summary-sub" id="subLife">入¥0 | 支¥0</div>
@@ -1267,7 +1260,6 @@
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
           <div class="summary-title-wrap"><span class="dot save"></span><span class="label">必须存储</span></div>
-          <span class="ratio-tag" id="summaryLabel-save">30%</span>
         </div>
         <div class="val" id="balSave">¥0.00</div>
         <div class="summary-sub" id="subSave">入¥0 | 支¥0</div>
@@ -1275,7 +1267,6 @@
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
           <div class="summary-title-wrap"><span class="dot fund"></span><span class="label">备用金</span></div>
-          <span class="ratio-tag" id="summaryLabel-fund">20%</span>
         </div>
         <div class="val" id="balFund">¥0.00</div>
         <div class="summary-sub" id="subFund">入¥0 | 支¥0</div>
@@ -1283,7 +1274,6 @@
       <div class="summary-item" onclick="openRatioModal()">
         <div class="summary-item-header">
           <div class="summary-title-wrap"><span class="dot invest"></span><span class="label">理财</span></div>
-          <span class="ratio-tag" id="summaryLabel-invest">10%</span>
         </div>
         <div class="val" id="balInvest">¥0.00</div>
         <div class="summary-sub" id="subInvest">入¥0 | 支¥0</div>
@@ -1405,6 +1395,7 @@
         <div class="input-field" id="salaryAmountField">
           <label>入账金额 (¥)</label>
           <input type="number" id="salaryAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+          <div class="account-balance-hint" id="allocRatioHint"></div>
         </div>
         <div class="input-field">
           <label>分配方式</label>
@@ -2080,10 +2071,12 @@
 
   function updateRatioUI() {
     orderKeys.forEach(k => {
-      const val = ratios[k];
-      document.getElementById(`summaryLabel-${k}`).innerText = `${val}%`;
-      document.getElementById(`opt-${k}`).innerText = `${accountNames[k]} (${val}%)`;
+      document.getElementById(`opt-${k}`).innerText = `${accountNames[k]} (${ratios[k]}%)`;
     });
+    const hint = document.getElementById('allocRatioHint');
+    if (hint) {
+      hint.textContent = `将按 ${orderKeys.map(k => `${accountNames[k]} ${ratios[k]}%`).join(' · ')} 自动分配`;
+    }
   }
 
 
@@ -2198,6 +2191,7 @@
     document.getElementById('allocModeRatioBtn').classList.toggle('active', !isCustom);
     document.getElementById('allocModeCustomBtn').classList.toggle('active', isCustom);
     document.getElementById('salaryAmountField').style.display = isCustom ? 'none' : 'block';
+    document.getElementById('allocRatioHint').style.display = isCustom ? 'none' : 'block';
     document.getElementById('customAllocWrap').style.display = isCustom ? 'block' : 'none';
     document.getElementById('salarySubmitBtn').textContent = isCustom ? '按指定金额入账' : '按当前比例分配入账';
 
