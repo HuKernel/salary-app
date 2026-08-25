@@ -139,6 +139,8 @@
     }
     .summary-sub { font-size: 0.68rem; color: var(--text-dim); margin-top: 3px; font-variant-numeric: tabular-nums; }
 
+    .summary-tap-hint { margin-top: 10px; text-align: center; font-size: 0.66rem; color: var(--text-dim); }
+
     .tab-nav { 
       display: flex; 
       gap: 4px; 
@@ -214,6 +216,7 @@
     .btn-action-edit { background: #f8fafc; color: var(--text-muted); border: 1px solid var(--border-dark); padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; }
 
     .filter-bar { display: flex; gap: 6px; margin-bottom: 10px; width: 100%; }
+    .filter-bar.filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
     .filter-bar select {
       flex: 1;
       padding: 6px 6px; 
@@ -441,13 +444,6 @@
       font-size: 0.8rem;
       padding: 20px;
       line-height: 1.5;
-    }
-
-    .trend-footnote {
-      margin-top: 10px;
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      line-height: 1.45;
     }
 
 
@@ -1114,13 +1110,6 @@
       cursor: pointer;
     }
 
-    .trend-touch-tip {
-      margin-top: 7px;
-      font-size: 0.68rem;
-      color: var(--text-dim);
-      text-align: center;
-    }
-
     @keyframes detailCardIn {
       from { opacity: 0; transform: translateY(7px) scale(0.99); }
       to { opacity: 1; transform: translateY(0) scale(1); }
@@ -1190,9 +1179,14 @@
     }
 
     .mobile-nav-btn .nav-icon {
-      font-size: 1.08rem;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       line-height: 1;
     }
+    .mobile-nav-btn .nav-icon svg { width: 100%; height: 100%; display: block; }
 
     .mobile-nav-btn.active {
       background: var(--text);
@@ -1278,6 +1272,7 @@
         <div class="summary-sub" id="subInvest">入¥0 | 支¥0</div>
       </div>
     </div>
+    <div class="summary-tap-hint">点按账户卡片可调整分配比例</div>
   </section>
 
   <!-- 月度小结 + 预算 -->
@@ -1312,18 +1307,18 @@
     <div id="budgetSection" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);"></div>
   </section>
 
-  <!-- 图表区 -->
+  <!-- 图表区：收支趋势 -->
   <section class="card page-view active" id="pageOverviewCharts">
     <div class="trend-section">
       <div class="trend-header">
-        <div class="trend-title">收支折线</div>
+        <div class="trend-title">收支趋势</div>
         <div class="trend-legend">
           <span class="legend-item" id="legendNet"><span class="legend-line" style="background:#0f172a"></span>净资产</span>
           <span class="legend-item" id="legendIncome"><span class="legend-line" style="background:#10b981"></span>收入</span>
           <span class="legend-item" id="legendExpense"><span class="legend-line" style="background:#e11d48"></span>支出</span>
         </div>
       </div>
-      <div class="trend-subtitle" id="trendSubtitle">现在支持按年 / 月 / 日切换查看：年视图看月份，月视图看日期，日视图看时间。</div>
+      <div class="trend-subtitle" id="trendSubtitle">按月查看每日收支与净资产走势。</div>
       <div class="trend-toolbar">
         <div class="trend-switcher">
           <button class="trend-switch-btn active" id="trendModeYear" onclick="setTrendView('year')">年</button>
@@ -1338,9 +1333,8 @@
       </div>
       <div class="chart-shell">
         <canvas id="trendChart" class="trend-chart"></canvas>
-        <div class="chart-empty" id="trendChartEmpty" style="display:none;">暂无趋势数据<br>先新增一笔收入或支出后，这里会自动生成折线图。</div>
+        <div class="chart-empty" id="trendChartEmpty" style="display:none;">暂无趋势数据，新增一笔收入或支出后自动生成。</div>
       </div>
-      <div class="trend-touch-tip" id="trendTouchTip">月视图下可点击或左右滑动折线图，查看某一天的详细收支。</div>
       <div class="trend-detail-card" id="trendDetailCard">
         <div class="trend-detail-head">
           <div class="trend-detail-date" id="trendDetailDate">--</div>
@@ -1357,31 +1351,34 @@
       <div class="trend-meta">
         <span id="trendRangeText"><strong>当前范围：</strong>--</span>
       </div>
-      <div class="breakdown-section">
-        <div class="breakdown-head">
-          <div>
-            <div class="breakdown-title">分类构成</div>
-            <div class="breakdown-subtitle" id="breakdownSubtitle">跟随当前时间范围统计；支出优先按分类统计，无分类时按备注/账户归类</div>
-          </div>
-          <div class="breakdown-switcher">
-            <button class="breakdown-switch-btn active" id="breakdownExpenseBtn" onclick="setBreakdownMode('expense')">支出分类</button>
-            <button class="breakdown-switch-btn" id="breakdownIncomeBtn" onclick="setBreakdownMode('income')">收入分类</button>
-          </div>
-        </div>
+    </div>
+  </section>
 
-        <div class="breakdown-content">
-          <div class="donut-wrap">
-            <canvas id="breakdownChart" class="breakdown-chart"></canvas>
-            <div class="donut-center">
-              <span id="breakdownCenterLabel">支出</span>
-              <strong id="breakdownCenterValue">¥0.00</strong>
-            </div>
-            <div class="breakdown-empty" id="breakdownEmpty" style="display:none;">当前范围暂无分类数据</div>
-          </div>
-          <div class="breakdown-legend" id="breakdownLegend"></div>
+  <!-- 图表区：分类构成 -->
+  <section class="card page-view active" id="pageOverviewBreakdown">
+    <div class="breakdown-section" style="margin-top:0; padding-top:0; border-top:none;">
+      <div class="breakdown-head">
+        <div>
+          <div class="breakdown-title">分类构成</div>
+          <div class="breakdown-subtitle" id="breakdownSubtitle">按当前范围统计支出分类，点击图例看明细。</div>
+        </div>
+        <div class="breakdown-switcher">
+          <button class="breakdown-switch-btn active" id="breakdownExpenseBtn" onclick="setBreakdownMode('expense')">支出分类</button>
+          <button class="breakdown-switch-btn" id="breakdownIncomeBtn" onclick="setBreakdownMode('income')">收入分类</button>
         </div>
       </div>
-      <div class="trend-footnote">已优化为多时间维度查看：年视图的 x 轴是月份，月视图的 x 轴是日期，日视图的 x 轴是时间。</div>
+
+      <div class="breakdown-content">
+        <div class="donut-wrap">
+          <canvas id="breakdownChart" class="breakdown-chart"></canvas>
+          <div class="donut-center">
+            <span id="breakdownCenterLabel">支出</span>
+            <strong id="breakdownCenterValue">¥0.00</strong>
+          </div>
+          <div class="breakdown-empty" id="breakdownEmpty" style="display:none;">当前范围暂无分类数据</div>
+        </div>
+        <div class="breakdown-legend" id="breakdownLegend"></div>
+      </div>
     </div>
   </section>
   <!-- 录入模块 -->
@@ -1514,12 +1511,12 @@
 
   <!-- 列表 -->
   <section class="card page-view" id="pageRecords">
-    <div class="page-caption">按类型、年份和月份筛选历史收入与支出流水。</div>
+    <div class="page-caption">搜索或按类型、时间、分类筛选历史收支流水。</div>
     <div class="filter-bar" style="margin-bottom: 6px;">
       <input type="search" id="recordSearchInput" placeholder="🔍 搜索备注 / 名称 / 分类" oninput="resetRecordPageAndRender()" onsearch="resetRecordPageAndRender()"
         style="flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-dark); font-size: 0.78rem; background: #fafafa; color: var(--text); outline: none;">
     </div>
-    <div class="filter-bar">
+    <div class="filter-bar filter-grid">
       <select id="listTypeFilter" onchange="resetRecordPageAndRender()">
         <option value="all">全部类型</option>
         <option value="salary">收入</option>
@@ -1553,13 +1550,16 @@
 
 <nav class="mobile-bottom-nav" aria-label="主页面导航">
   <button class="mobile-nav-btn active" id="navOverview" onclick="switchPage('overview')">
-    <span class="nav-icon">◫</span><span>资产总览</span>
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+    <span>资产总览</span>
   </button>
   <button class="mobile-nav-btn" id="navEntry" onclick="switchPage('entry')">
-    <span class="nav-icon">＋</span><span>记账录入</span>
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span>
+    <span>记账录入</span>
   </button>
   <button class="mobile-nav-btn" id="navRecords" onclick="switchPage('records')">
-    <span class="nav-icon">≡</span><span>流水记录</span>
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg></span>
+    <span>流水记录</span>
   </button>
 </nav>
 
@@ -2186,7 +2186,7 @@
 
 
   function switchPage(page) {
-    const overviewCards = ['pageOverview', 'pageOverviewSub', 'pageOverviewCharts'];
+    const overviewCards = ['pageOverview', 'pageOverviewSub', 'pageOverviewCharts', 'pageOverviewBreakdown'];
     const pages = {
       overview: document.getElementById('pageOverview'),
       entry: document.getElementById('pageEntry'),
@@ -2874,7 +2874,9 @@
       const cards = Array.from(activePage.querySelectorAll('.summary-item'));
       clearAnimationClassList(cards, 'box-open-anim');
       cards.forEach((card, index) => restartAnimation(card, 'box-open-anim', 70 + index * 80));
-      restartAnimation(activePage.querySelector('.trend-section'), 'chart-rise-anim', 360);
+      restartAnimation(document.getElementById('pageOverviewSub'), 'chart-rise-anim', 340);
+      restartAnimation(document.getElementById('pageOverviewCharts'), 'chart-rise-anim', 420);
+      restartAnimation(document.getElementById('pageOverviewBreakdown'), 'chart-rise-anim', 500);
       return;
     }
 
@@ -2939,14 +2941,11 @@
     if (monthPicker) monthPicker.style.display = trendViewMode === 'month' ? 'block' : 'none';
     if (datePicker) datePicker.style.display = trendViewMode === 'day' ? 'block' : 'none';
 
-    const touchTip = document.getElementById('trendTouchTip');
-    if (touchTip) touchTip.style.display = trendViewMode === 'month' ? 'block' : 'none';
-
     const subtitle = document.getElementById('trendSubtitle');
     if (subtitle) {
-      if (trendViewMode === 'year') subtitle.innerText = '年视图：选择某一年后，x 轴显示 1–12 月，方便看全年收入、支出和净资产累计变化。';
-      if (trendViewMode === 'month') subtitle.innerText = '月视图：保留每天的数据点，但会根据手机宽度自动减少 x 轴日期文字，避免 1–31 日挤在一起。';
-      if (trendViewMode === 'day') subtitle.innerText = '日视图：x 轴按小时展示，并根据屏幕宽度自动抽稀时间标签；没有交易的时段仍按 0 计算。';
+      if (trendViewMode === 'year') subtitle.innerText = '全年各月的收入、支出与净资产走势。';
+      if (trendViewMode === 'month') subtitle.innerText = '当月每日收支走势，点按图表可查看某天明细。';
+      if (trendViewMode === 'day') subtitle.innerText = '当天分时段收支，无交易时段按 0 计。';
     }
   }
 
