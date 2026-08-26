@@ -3077,12 +3077,16 @@
   let trendChartHitData = null;
   let selectedTrendDay = null;
   let trendPointerActive = false;
-  // 图例点击隐藏的序列（净资产是累计值、量级远大于当期收支，隐藏后 Y 轴才能看清收支波动）
-  let hiddenTrendSeries = new Set();
+  // 图例点击隐藏的序列。净资产是累计值、量级远大于当期收支，默认隐藏让图聚焦收支波动；
+  // 用户点图例显隐后记住选择（默认只藏净资产，轨迹仍可随时点回）
+  let hiddenTrendSeriesArr = safeParse(localStorage.getItem('salary_trend_hidden_series'), ['net']);
+  if (!Array.isArray(hiddenTrendSeriesArr)) hiddenTrendSeriesArr = ['net'];
+  let hiddenTrendSeries = new Set(hiddenTrendSeriesArr.filter(k => k === 'net' || k === 'income' || k === 'expense'));
 
   function toggleTrendSeries(key) {
     if (hiddenTrendSeries.has(key)) hiddenTrendSeries.delete(key);
     else hiddenTrendSeries.add(key);
+    try { localStorage.setItem('salary_trend_hidden_series', JSON.stringify([...hiddenTrendSeries])); } catch (e) {}
     renderTrendChart(false);
   }
 
