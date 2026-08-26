@@ -408,6 +408,10 @@
       align-items: center;
       gap: 5px;
       white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: opacity 0.15s ease;
     }
 
     .legend-line {
@@ -527,6 +531,11 @@
       font-size: 0.66rem;
       color: var(--text-dim);
       margin-left: 1px;
+    }
+
+    .legend-item.series-hidden {
+      opacity: 0.38;
+      text-decoration: line-through;
     }
 
     .chart-shell {
@@ -1313,9 +1322,9 @@
       <div class="trend-header">
         <div class="trend-title">收支趋势</div>
         <div class="trend-legend">
-          <span class="legend-item" id="legendNet"><span class="legend-line" style="background:#0f172a"></span>净资产</span>
-          <span class="legend-item" id="legendIncome"><span class="legend-line" style="background:#10b981"></span>收入</span>
-          <span class="legend-item" id="legendExpense"><span class="legend-line" style="background:#e11d48"></span>支出</span>
+          <span class="legend-item" id="legendNet" onclick="toggleTrendSeries('net')" title="点击显示/隐藏"><span class="legend-line" style="background:#0f172a"></span>净资产</span>
+          <span class="legend-item" id="legendIncome" onclick="toggleTrendSeries('income')" title="点击显示/隐藏"><span class="legend-line" style="background:#10b981"></span>收入</span>
+          <span class="legend-item" id="legendExpense" onclick="toggleTrendSeries('expense')" title="点击显示/隐藏"><span class="legend-line" style="background:#e11d48"></span>支出</span>
         </div>
       </div>
       <div class="trend-subtitle" id="trendSubtitle">按月查看每日收支与净资产走势。</div>
@@ -2943,9 +2952,9 @@
 
     const subtitle = document.getElementById('trendSubtitle');
     if (subtitle) {
-      if (trendViewMode === 'year') subtitle.innerText = '全年各月的收入、支出与净资产走势。';
-      if (trendViewMode === 'month') subtitle.innerText = '当月每日收支走势，点按图表可查看某天明细。';
-      if (trendViewMode === 'day') subtitle.innerText = '当天分时段收支，无交易时段按 0 计。';
+      if (trendViewMode === 'year') subtitle.innerText = '全年各月的收入、支出与净资产走势。点图例可显隐序列。';
+      if (trendViewMode === 'month') subtitle.innerText = '当月每日收支走势，点按图表查看某天明细。点图例可显隐序列。';
+      if (trendViewMode === 'day') subtitle.innerText = '当天分时段收支，无交易时段按 0 计。点图例可显隐序列。';
     }
   }
 
@@ -3068,6 +3077,14 @@
   let trendChartHitData = null;
   let selectedTrendDay = null;
   let trendPointerActive = false;
+  // 图例点击隐藏的序列（净资产是累计值、量级远大于当期收支，隐藏后 Y 轴才能看清收支波动）
+  let hiddenTrendSeries = new Set();
+
+  function toggleTrendSeries(key) {
+    if (hiddenTrendSeries.has(key)) hiddenTrendSeries.delete(key);
+    else hiddenTrendSeries.add(key);
+    renderTrendChart(false);
+  }
 
   function showToast(message) {
     const toast = document.getElementById('appToast');
@@ -3732,18 +3749,39 @@
     const hasExpense = data.some(item => Math.abs(item.expense) > 0.000001);
     const hasNetContext = events.some(event => event.dateTime < rangeEnd);
 
+    // 图例可点击隐藏序列：隐藏后 Y 轴按剩余可见序列重新定标
+    const showNet = hasNetContext && !hiddenTrendSeries.has('net');
+    const showIncome = hasIncome && !hiddenTrendSeries.has('income');
+    const showExpense = hasExpense && !hiddenTrendSeries.has('expense');
+
     const legendNet = document.getElementById('legendNet');
     const legendIncome = document.getElementById('legendIncome');
     const legendExpense = document.getElementById('legendExpense');
-    if (legendNet) legendNet.classList.toggle('series-empty', !hasNetContext);
-    if (legendIncome) legendIncome.classList.toggle('series-empty', !hasIncome);
-    if (legendExpense) legendExpense.classList.toggle('series-empty', !hasExpense);
+    if (legendNet) {
+      legendNet.classList.toggle('series-empty', !hasNetContext);
+      legendNet.classList.toggle('series-hidden', hiddenTrendSeries.has('net'));
+    }
+    if (legendIncome) {
+      legendIncome.classList.toggle('series-empty', !hasIncome);
+      legendIncome.classList.toggle('series-hidden', hiddenTrendSeries.has('income'));
+    }
+    if (legendExpense) {
+      legendExpense.classList.toggle('series-empty', !hasExpense);
+      legendExpense.classList.toggle('series-hidden', hiddenTrendSeries.has('expense'));
+    }
 
     // If the selected range is before any recorded activity, show an empty state instead of fake zero lines.
     if (!data.length || (!hasNetContext && !hasIncome && !hasExpense)) {
       canvas.style.display = 'none';
       emptyEl.style.display = 'flex';
       emptyEl.innerHTML = '当前时间范围暂无记录<br>切换时间范围或新增一笔收入 / 支出后查看趋势。';
+      return;
+    }
+
+    if (!showNet && !showIncome && !showExpense) {
+      canvas.style.display = 'none';
+      emptyEl.style.display = 'flex';
+      emptyEl.innerHTML = '已隐藏全部序列，点击上方图例恢复显示。';
       return;
     }
 
@@ -3765,9 +3803,9 @@
     ctx.scale(dpr, dpr);
 
     const visibleValues = [];
-    if (hasNetContext) visibleValues.push(...data.map(item => item.net));
-    if (hasIncome) visibleValues.push(...data.map(item => item.income));
-    if (hasExpense) visibleValues.push(...data.map(item => item.expense));
+    if (showNet) visibleValues.push(...data.map(item => item.net));
+    if (showIncome) visibleValues.push(...data.map(item => item.income));
+    if (showExpense) visibleValues.push(...data.map(item => item.expense));
     if (!visibleValues.length) visibleValues.push(0);
 
     let minVal = Math.min(...visibleValues, 0);
@@ -3832,9 +3870,9 @@
       return idx % xLabelEvery === 0;
     };
 
-    const netPoints = hasNetContext ? data.map((item, idx) => ({ x: getX(idx), y: getY(item.net) })) : [];
-    const incomePoints = hasIncome ? data.map((item, idx) => ({ x: getX(idx), y: getY(item.income) })) : [];
-    const expensePoints = hasExpense ? data.map((item, idx) => ({ x: getX(idx), y: getY(item.expense) })) : [];
+    const netPoints = showNet ? data.map((item, idx) => ({ x: getX(idx), y: getY(item.net) })) : [];
+    const incomePoints = showIncome ? data.map((item, idx) => ({ x: getX(idx), y: getY(item.income) })) : [];
+    const expensePoints = showExpense ? data.map((item, idx) => ({ x: getX(idx), y: getY(item.expense) })) : [];
 
     trendChartHitData = { data, paddingLeft: padding.left, chartWidth, count: data.length, getX, getY };
     bindTrendChartInteraction();
@@ -3898,9 +3936,9 @@
 
     const paint = progress => {
       drawStaticBase();
-      if (hasNetContext) drawLine(ctx, netPoints, '#0f172a', progress, pointEvery);
-      if (hasIncome) drawLine(ctx, incomePoints, '#10b981', progress, pointEvery);
-      if (hasExpense) drawLine(ctx, expensePoints, '#e11d48', progress, pointEvery);
+      if (showNet) drawLine(ctx, netPoints, '#0f172a', progress, pointEvery);
+      if (showIncome) drawLine(ctx, incomePoints, '#10b981', progress, pointEvery);
+      if (showExpense) drawLine(ctx, expensePoints, '#e11d48', progress, pointEvery);
     };
 
     if (prefersReducedMotion || !animateChart) {
