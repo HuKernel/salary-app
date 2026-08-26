@@ -3556,10 +3556,7 @@
     ctx.beginPath();
     ctx.lineWidth = 2.2;
     ctx.strokeStyle = color;
-    visiblePoints.forEach((point, index) => {
-      if (index === 0) ctx.moveTo(point.x, point.y);
-      else ctx.lineTo(point.x, point.y);
-    });
+    traceSmoothPath(ctx, visiblePoints);
     ctx.stroke();
 
     visiblePoints.forEach((point, index) => {
@@ -3575,6 +3572,36 @@
       ctx.arc(point.x, point.y, 2.1, 0, Math.PI * 2);
       ctx.fill();
     });
+  }
+
+  // 单调三次插值平滑（同 d3 curveMonotoneX）：曲线圆润但不过冲，不会在数据点之间造出假峰谷
+  function traceSmoothPath(ctx, pts) {
+    const n = pts.length;
+    if (n === 1) return;
+    ctx.moveTo(pts[0].x, pts[0].y);
+    if (n === 2) { ctx.lineTo(pts[1].x, pts[1].y); return; }
+
+    const seg = i => (pts[i + 1].y - pts[i].y) / ((pts[i + 1].x - pts[i].x) || 1e-6);
+    const sign = v => (v < 0 ? -1 : v > 0 ? 1 : 0);
+    const m = new Array(n);
+    m[0] = seg(0);
+    m[n - 1] = seg(n - 2);
+    for (let i = 1; i < n - 1; i++) {
+      const s0 = seg(i - 1), s1 = seg(i);
+      const h0 = pts[i].x - pts[i - 1].x, h1 = pts[i + 1].x - pts[i].x;
+      const p = (s0 * h1 + s1 * h0) / (h0 + h1);
+      m[i] = (sign(s0) + sign(s1)) * Math.min(Math.abs(s0), Math.abs(s1), 0.5 * Math.abs(p));
+      if (!isFinite(m[i])) m[i] = 0;
+    }
+
+    for (let i = 0; i < n - 1; i++) {
+      const h = pts[i + 1].x - pts[i].x;
+      ctx.bezierCurveTo(
+        pts[i].x + h / 3, pts[i].y + m[i] * h / 3,
+        pts[i + 1].x - h / 3, pts[i + 1].y - m[i + 1] * h / 3,
+        pts[i + 1].x, pts[i + 1].y
+      );
+    }
   }
 
 
