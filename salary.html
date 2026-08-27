@@ -401,6 +401,7 @@
       gap: 10px;
       font-size: 0.73rem;
       color: var(--text-muted);
+      margin-bottom: 8px;
     }
 
     .legend-item {
@@ -1321,11 +1322,14 @@
     <div class="trend-section">
       <div class="trend-header">
         <div class="trend-title">收支趋势</div>
-        <div class="trend-legend">
-          <span class="legend-item" id="legendNet" onclick="toggleTrendSeries('net')" title="点击显示/隐藏"><span class="legend-line" style="background:#0f172a"></span>净资产</span>
-          <span class="legend-item" id="legendIncome" onclick="toggleTrendSeries('income')" title="点击显示/隐藏"><span class="legend-line" style="background:#10b981"></span>收入</span>
-          <span class="legend-item" id="legendExpense" onclick="toggleTrendSeries('expense')" title="点击显示/隐藏"><span class="legend-line" style="background:#e11d48"></span>支出</span>
+        <div class="breakdown-switcher">
+          <button class="breakdown-switch-btn active" id="breakdownExpenseBtn" onclick="setBreakdownMode('expense')">支出</button>
+          <button class="breakdown-switch-btn" id="breakdownIncomeBtn" onclick="setBreakdownMode('income')">收入</button>
         </div>
+      </div>
+      <div class="trend-legend">
+        <span class="legend-item" id="legendType"><span class="legend-line" id="legendTypeLine" style="background:#e11d48"></span><span id="legendTypeText">支出</span></span>
+        <span class="legend-item" id="legendNet" onclick="toggleTrendSeries('net')" title="点击显示/隐藏"><span class="legend-line" style="background:#0f172a"></span>净资产</span>
       </div>
       <div class="trend-subtitle" id="trendSubtitle">按月查看每日收支与净资产走势。</div>
       <div class="trend-toolbar">
@@ -1370,10 +1374,6 @@
         <div>
           <div class="breakdown-title">分类构成</div>
           <div class="breakdown-subtitle" id="breakdownSubtitle">按当前范围统计支出分类，点击图例看明细。</div>
-        </div>
-        <div class="breakdown-switcher">
-          <button class="breakdown-switch-btn active" id="breakdownExpenseBtn" onclick="setBreakdownMode('expense')">支出分类</button>
-          <button class="breakdown-switch-btn" id="breakdownIncomeBtn" onclick="setBreakdownMode('income')">收入分类</button>
         </div>
       </div>
 
@@ -3133,6 +3133,7 @@
     if (incomeBtn) incomeBtn.classList.toggle('active', breakdownMode === 'income');
 
     renderBreakdownChart();
+    renderTrendChart(false);
   }
 
   function getTrendRangeBounds() {
@@ -3780,26 +3781,25 @@
     const hasExpense = data.some(item => Math.abs(item.expense) > 0.000001);
     const hasNetContext = events.some(event => event.dateTime < rangeEnd);
 
-    // 图例可点击隐藏序列：隐藏后 Y 轴按剩余可见序列重新定标
+    // 支出/收入由统一切换器决定：折线图一次只画其中一条，Y 轴更聚焦
+    const isExpenseMode = breakdownMode === 'expense';
     const showNet = hasNetContext && !hiddenTrendSeries.has('net');
-    const showIncome = hasIncome && !hiddenTrendSeries.has('income');
-    const showExpense = hasExpense && !hiddenTrendSeries.has('expense');
+    const showIncome = !isExpenseMode && hasIncome;
+    const showExpense = isExpenseMode && hasExpense;
+    const hasTypeData = isExpenseMode ? hasExpense : hasIncome;
 
     const legendNet = document.getElementById('legendNet');
-    const legendIncome = document.getElementById('legendIncome');
-    const legendExpense = document.getElementById('legendExpense');
     if (legendNet) {
       legendNet.classList.toggle('series-empty', !hasNetContext);
       legendNet.classList.toggle('series-hidden', hiddenTrendSeries.has('net'));
     }
-    if (legendIncome) {
-      legendIncome.classList.toggle('series-empty', !hasIncome);
-      legendIncome.classList.toggle('series-hidden', hiddenTrendSeries.has('income'));
-    }
-    if (legendExpense) {
-      legendExpense.classList.toggle('series-empty', !hasExpense);
-      legendExpense.classList.toggle('series-hidden', hiddenTrendSeries.has('expense'));
-    }
+    // 当前类型图例：颜色与文字随模式切换
+    const legendType = document.getElementById('legendType');
+    const legendTypeLine = document.getElementById('legendTypeLine');
+    const legendTypeText = document.getElementById('legendTypeText');
+    if (legendTypeLine) legendTypeLine.style.background = isExpenseMode ? '#e11d48' : '#10b981';
+    if (legendTypeText) legendTypeText.textContent = isExpenseMode ? '支出' : '收入';
+    if (legendType) legendType.classList.toggle('series-empty', !hasTypeData);
 
     // If the selected range is before any recorded activity, show an empty state instead of fake zero lines.
     if (!data.length || (!hasNetContext && !hasIncome && !hasExpense)) {
@@ -3809,10 +3809,10 @@
       return;
     }
 
-    if (!showNet && !showIncome && !showExpense) {
+    if (!showNet && !hasTypeData) {
       canvas.style.display = 'none';
       emptyEl.style.display = 'flex';
-      emptyEl.innerHTML = '已隐藏全部序列，点击上方图例恢复显示。';
+      emptyEl.innerHTML = `当前范围暂无${isExpenseMode ? '支出' : '收入'}记录${hasNetContext ? '，点图例可显示净资产。' : '。'}`;
       return;
     }
 
