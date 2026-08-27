@@ -1336,7 +1336,7 @@
         <div class="trend-switcher">
           <button class="trend-switch-btn active" id="trendModeYear" onclick="setTrendView('year')">年</button>
           <button class="trend-switch-btn" id="trendModeMonth" onclick="setTrendView('month')">月</button>
-          <button class="trend-switch-btn" id="trendModeDay" onclick="setTrendView('day')">日</button>
+          <button class="trend-switch-btn" id="trendModeWeek" onclick="setTrendView('week')">周</button>
         </div>
         <div class="trend-picker-wrap">
           <select id="trendYearPicker" onchange="onTrendPickerChange()"></select>
@@ -1359,7 +1359,6 @@
           <div class="trend-detail-stat"><span class="k">净变化</span><span class="v" id="trendDetailDelta">¥0.00</span></div>
         </div>
         <div class="trend-detail-list" id="trendDetailList"></div>
-        <button class="trend-detail-action" onclick="drillDownTrendDay()">查看当天时间趋势 →</button>
       </div>
       <div class="trend-meta">
         <span id="trendRangeText"><strong>当前范围：</strong>--</span>
@@ -1841,6 +1840,7 @@
   const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}`;
   const currentDateStr = `${currentMonthStr}-${String(now.getDate()).padStart(2, '0')}`;
   let trendViewMode = localStorage.getItem('salary_trend_view_mode') || 'month';
+  if (trendViewMode === 'day') trendViewMode = 'week'; // 旧版"日(小时)"已升级为"周"
   let trendSelectedYear = String(now.getFullYear());
   let trendSelectedMonth = currentMonthStr;
   let trendSelectedDate = currentDateStr;
@@ -2937,7 +2937,7 @@
   }
 
   function updateTrendControlUI() {
-    const modes = ['year', 'month', 'day'];
+    const modes = ['year', 'month', 'week'];
     modes.forEach(mode => {
       const btn = document.getElementById(`trendMode${mode.charAt(0).toUpperCase() + mode.slice(1)}`);
       if (btn) btn.classList.toggle('active', trendViewMode === mode);
@@ -2948,13 +2948,13 @@
     const datePicker = document.getElementById('trendDatePicker');
     if (yearPicker) yearPicker.style.display = trendViewMode === 'year' ? 'block' : 'none';
     if (monthPicker) monthPicker.style.display = trendViewMode === 'month' ? 'block' : 'none';
-    if (datePicker) datePicker.style.display = trendViewMode === 'day' ? 'block' : 'none';
+    if (datePicker) datePicker.style.display = trendViewMode === 'week' ? 'block' : 'none';
 
     const subtitle = document.getElementById('trendSubtitle');
     if (subtitle) {
       if (trendViewMode === 'year') subtitle.innerText = '全年各月的收入、支出与净资产走势。点图例可显隐序列。';
       if (trendViewMode === 'month') subtitle.innerText = '当月每日收支走势，点按图表查看某天明细。点图例可显隐序列。';
-      if (trendViewMode === 'day') subtitle.innerText = '当天分时段收支，无交易时段按 0 计。点图例可显隐序列。';
+      if (trendViewMode === 'week') subtitle.innerText = '所选日期所在周（周一~周日）的每日收支。点图例可显隐序列。';
     }
   }
 
@@ -3136,6 +3136,14 @@
     renderTrendChart(false);
   }
 
+  // 返回某日期所在周的周一 0 点
+  function getWeekStart(dateStr) {
+    const d = new Date(`${dateStr || currentDateStr}T00:00:00`);
+    const dow = (d.getDay() + 6) % 7; // 0=周一
+    d.setDate(d.getDate() - dow);
+    return d;
+  }
+
   function getTrendRangeBounds() {
     if (trendViewMode === 'year') {
       const year = parseInt(trendSelectedYear, 10) || now.getFullYear();
@@ -3155,11 +3163,12 @@
       };
     }
 
-    const start = new Date(`${trendSelectedDate || currentDateStr}T00:00:00`);
+    const start = getWeekStart(trendSelectedDate);
+    const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
     return {
       start,
-      end: new Date(start.getTime() + 24 * 60 * 60 * 1000),
-      label: trendSelectedDate || currentDateStr
+      end,
+      label: `${formatDateLocal(start)} ~ ${formatDateLocal(new Date(end.getTime() - 24 * 60 * 60 * 1000))}`
     };
   }
 
@@ -3509,24 +3518,26 @@
         }
       });
     } else {
-      startDate = new Date(`${trendSelectedDate || currentDateStr}T00:00:00`);
-      endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
-      rangeLabel = `${trendSelectedDate || currentDateStr}（x 轴：时间）`;
-      buckets = Array.from({ length: 24 }, (_, index) => ({
+      // 周视图：展示所选日期所在周（周一~周日）7 天
+      const weekLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+      startDate = getWeekStart(trendSelectedDate);
+      endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+      rangeLabel = `${formatDateLocal(startDate)} ~ ${formatDateLocal(new Date(endDate.getTime() - 24 * 60 * 60 * 1000))}（x 轴：星期）`;
+      buckets = Array.from({ length: 7 }, (_, index) => ({
         key: index,
-        label: `${pad(index)}:00`,
+        label: weekLabels[index],
         income: 0,
         expense: 0,
         net: 0
       }));
 
       events.forEach(event => {
-        const dateKey = formatDateLocal(event.dateTime);
-        if (dateKey === (trendSelectedDate || currentDateStr)) {
-          const hourIndex = event.dateTime.getHours();
-          if (buckets[hourIndex]) {
-            if (event.type === 'income') buckets[hourIndex].income += event.amount;
-            else buckets[hourIndex].expense += event.amount;
+        const dateObj = new Date(`${event.dateKey}T00:00:00`);
+        if (dateObj >= startDate && dateObj < endDate) {
+          const weekIndex = Math.round((dateObj - startDate) / (24 * 60 * 60 * 1000));
+          if (buckets[weekIndex]) {
+            if (event.type === 'income') buckets[weekIndex].income += event.amount;
+            else buckets[weekIndex].expense += event.amount;
           }
         }
       });
@@ -3688,23 +3699,6 @@
     renderTrendChart(false);
   }
 
-  function drillDownTrendDay() {
-    if (!selectedTrendDay) return;
-
-    const targetDate = selectedTrendDay;
-    trendSelectedDate = targetDate;
-
-    const datePicker = document.getElementById('trendDatePicker');
-    if (datePicker) datePicker.value = targetDate;
-
-    setTrendView('day');
-
-    const card = document.getElementById('trendDetailCard');
-    if (card) card.classList.remove('show');
-
-    showToast(`已切换到 ${targetDate} 日视图`);
-  }
-
   function getTrendIndexFromPointer(evt) {
     if (!trendChartHitData || trendViewMode !== 'month') return null;
     const canvas = document.getElementById('trendChart');
@@ -3773,8 +3767,8 @@
       const [y, m] = (trendSelectedMonth || currentMonthStr).split('-').map(Number);
       rangeEnd = new Date(y, m, 1);
     } else {
-      const start = new Date(`${trendSelectedDate || currentDateStr}T00:00:00`);
-      rangeEnd = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+      const start = getWeekStart(trendSelectedDate);
+      rangeEnd = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
     }
 
     const hasIncome = data.some(item => Math.abs(item.income) > 0.000001);
@@ -3891,9 +3885,8 @@
       else if (cssWidth < 390) xLabelEvery = 5;
       else if (cssWidth < 460) xLabelEvery = 4;
       else xLabelEvery = 3;
-    } else if (trendViewMode === 'day') {
-      xLabelEvery = cssWidth < 360 ? 6 : 4;
     }
+    // 周视图只有 7 个点，标签全部显示（xLabelEvery 保持 1）
 
     const shouldShowXLabel = idx => {
       if (idx === 0 || idx === data.length - 1) return true;
